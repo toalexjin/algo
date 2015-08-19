@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <string.h>
 #include <assert.h>
 #include <string>
 #include <utility>
@@ -278,7 +279,7 @@ private:
 
 private:
 	hash_table_internal::ctner_t<Key, T> m_ctner;
-	const Hash m_hash;
+	Hash m_hash;
 };
 
 
