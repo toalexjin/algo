@@ -3,3 +3,5 @@
 /Debug/
 /.vs/
 *.sdf
+*.opensdf
+*.aps
