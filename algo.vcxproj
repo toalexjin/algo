@@ -151,11 +151,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="algo\hash_table.h" />
+    <ClInclude Include="algo\key_traits.h" />
     <ClInclude Include="test\test.h" />
     <ClInclude Include="test\test_hash_table.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="test\main.cpp" />
     <ClCompile Include="test\test.cpp" />
     <ClCompile Include="test\test_hash_table.cpp" />
   </ItemGroup>

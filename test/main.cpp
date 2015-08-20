@@ -1,3 +1,9 @@
+/**
+ * Test program.
+ *
+ * Copyright (C) 2015 Alex Jin. All rights reserved.
+ */
+
 #include "test/test.h"
 
 

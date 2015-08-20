@@ -1,3 +1,9 @@
+/**
+ * Test case for hash_table_t.
+ *
+ * Copyright (C) 2015 Alex Jin. All rights reserved.
+ */
+
 #include "test/test_hash_table.h"
 #include "algo/hash_table.h"
 #include <iostream>
@@ -11,7 +17,7 @@ namespace {
 
 bool test_hash_table_t::run() {
 
-	hash_table_t<std::string, std::string, hash_t<std::string>> table(3);
+	algo::hash_table_t<std::string, std::string> table(3);
 
 	std::string key;
 
@@ -38,6 +44,9 @@ bool test_hash_table_t::run() {
 	table.erase("C");
 	table.erase("G");
 	table.erase("H");
+
+	(*table.begin()).second += "  #begin() appended";
+	(*table.rbegin()).second += "  #rbegin() appended";
 
 	std::cout << "dump: " << table.size() << std::endl;
 	for (auto it = table.begin(); it != table.end(); ++it) {
