@@ -1,7 +1,13 @@
 # Introduction
 C++ Template Algorithms and Containers.
 
-# Build
-1. **Windows**: Open `algo.sln` with **Visual Studio 2015**.
-2. **Linux**: Run `make`.
+# Windows
+1. Open `algo.sln` with **Visual Studio 2015**.
+2. Click **Build** and **Start**.
+
+# Linux
+1. `make`
+2. `./testalgo`
+3. `make clean`
+
 
