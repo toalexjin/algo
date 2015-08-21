@@ -34,7 +34,12 @@ namespace hash_table__ {
 			node_t<Key, T>* m_last;
 		};
 
-		explicit ctner_t(size_t array_size) {
+		ctner_t() : m_array(0), m_array_size(0), m_size(0) {
+		}
+
+		void reset(size_t array_size) {
+			this->destroy();
+
 			m_array_size = array_size;
 			m_array = new link_t[m_array_size];
 			memset(m_array, 0, sizeof(m_array[0]) * m_array_size);
@@ -42,6 +47,10 @@ namespace hash_table__ {
 		}
 
 		~ctner_t() {
+			this->destroy();
+		}
+
+		void destroy() {
 			this->clear();
 			delete[] m_array;
 			m_array = 0;
@@ -59,6 +68,16 @@ namespace hash_table__ {
 
 			memset(m_array, 0, sizeof(m_array[0]) * m_array_size);
 			m_size = 0;
+		}
+
+		ctner_t<Key, T>& swap(ctner_t<Key, T>& another) {			
+			if (this != &another) {
+				auto tmp = *this;
+				*this = another;
+				another = tmp;
+			}
+
+			return *this;
 		}
 
 		link_t* m_array;
@@ -177,7 +196,7 @@ namespace hash_table__ {
 		bool operator==(const self_type& it) {
 			if (this->m_ctner == it.m_ctner
 				&& this->m_current == it.m_current
-				&& this->m_index == m_index) {
+				&& this->m_index == it.m_index) {
 				return true;
 			}
 
@@ -200,6 +219,7 @@ namespace hash_table__ {
 template <class Key, class T, class KeyTraits = key_traits_t<Key>>
 class hash_table_t {
 private:
+	typedef hash_table_t<Key, T, KeyTraits> self_type;
 	typedef hash_table__::node_t<Key, T>* node_ptr_t;
 	typedef const hash_table__::node_t<Key, T>* const_node_ptr_t;
 
@@ -233,10 +253,16 @@ public:
 	};
 
 public:
-	hash_table_t() : m_ctner(256) {
+	hash_table_t() {
+		this->m_ctner.reset(256);
 	}
 
-	explicit hash_table_t(size_t array_size) : m_ctner(array_size) {
+	hash_table_t(const self_type& another) {
+		*this = another;
+	}
+
+	explicit hash_table_t(size_t array_size) {
+		this->m_ctner.reset(array_size);
 	}
 
 	virtual ~hash_table_t() {
@@ -268,6 +294,9 @@ public:
 	reverse_iterator rend();
 	reverse_const_iterator rbegin() const;
 	reverse_const_iterator rend() const;
+
+	self_type& operator=(const self_type& another);
+	self_type& swap(self_type& another);
 
 private:
 	found_t find_i(const Key& key) const;
@@ -402,6 +431,32 @@ inline typename hash_table_t<Key, T, KeyTraits>::reverse_const_iterator hash_tab
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::reverse_const_iterator hash_table_t<Key, T, KeyTraits>::rend() const {
 	return reverse_const_iterator(this->begin());
+}
+
+
+template <class Key, class T, class KeyTraits>
+inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T, KeyTraits>::operator=(
+	const typename hash_table_t<Key, T, KeyTraits>::self_type& another) {
+
+	if (this != &another) {
+		this->m_ctner.reset(another.m_ctner.m_array_size);
+		for (const_iterator it = another.begin(); it != another.end(); ++it) {
+			this->insert(it->first, it->second);
+		}
+	}
+
+	return *this;
+}
+
+template <class Key, class T, class KeyTraits>
+inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T, KeyTraits>::swap(
+	typename hash_table_t<Key, T, KeyTraits>::self_type& another) {
+
+	if (this != &another) {
+		this->m_ctner.swap(&another.m_ctner);
+	}
+
+	return *this;
 }
 
 template <class Key, class T, class KeyTraits>

@@ -70,6 +70,12 @@ bool test_hash_table_t::run() {
 
 	dump_4(&table);
 
+	auto v2(table);
+	dump_4(&v2);
+
+	v2 = table;
+	dump_4(&v2);
+
 	return true;
 }
 
