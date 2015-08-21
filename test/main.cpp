@@ -1,7 +1,7 @@
 /**
  * Test program.
  *
- * Copyright (C) 2015 Alex Jin. All rights reserved.
+ * Copyright (c) 2015 Alex Jin (toalexjin@hotmail.com)
  */
 
 #include "test/test.h"
