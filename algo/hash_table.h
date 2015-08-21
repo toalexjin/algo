@@ -70,7 +70,7 @@ namespace hash_table__ {
 	template <class Key, class T, class Pointer, class Reference, class CtnerPointer, class NodePointer>
 	class iterator_t : public std::iterator<
 			std::bidirectional_iterator_tag,
-			std::pair<const Key, T>, ptrdiff_t, Pointer, Reference> {
+			std::pair<const Key, T>, std::ptrdiff_t, Pointer, Reference> {
 	private:
 		typedef iterator_t<Key, T, Pointer, Reference, CtnerPointer, NodePointer> self_type;
 
@@ -211,7 +211,7 @@ public:
 	typedef value_type& reference;
 	typedef const value_type& const_reference;
 	typedef size_t size_type;
-	typedef ptrdiff_t difference_type;
+	typedef std::ptrdiff_t difference_type;
 	typedef value_type* pointer;
 	typedef const value_type* const_pointer;
 	typedef hash_table__::iterator_t<Key, T, pointer, reference,
