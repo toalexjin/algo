@@ -5,6 +5,8 @@
  */
 
 #include "test/test.h"
+#include <iostream>
+#include <typeinfo>
 
 
 // Add itself to test manager automatically.
@@ -29,7 +31,13 @@ void test_manager_t::add(test_case_t* test) {
 
 void test_manager_t::run_all() {
 	for (auto it = m_tests.begin(); it != m_tests.end(); ++it) {
-		(*it)->run();
+		const auto& info(typeid(*(*it)));
+
+		std::cout << "----------- Begin <" << info.name() << "> -----------" << std::endl;
+		const auto result = (*it)->run();
+		std::cout << "----------- End <" << info.name() << ">: " << (result ? "Success" : "Failed") << " -----------" << std::endl;
+		std::cout << std::endl;
+		std::cout << std::endl;
 	}
 }
 

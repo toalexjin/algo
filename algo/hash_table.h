@@ -433,7 +433,6 @@ inline typename hash_table_t<Key, T, KeyTraits>::reverse_const_iterator hash_tab
 	return reverse_const_iterator(this->begin());
 }
 
-
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T, KeyTraits>::operator=(
 	const typename hash_table_t<Key, T, KeyTraits>::self_type& another) {
