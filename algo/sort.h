@@ -38,7 +38,7 @@ inline void selection_sort(Iterator first, Iterator last, const Less& less = Les
 		}
 
 		if (min != first + i) {
-			auto tmp = *min;
+			const auto tmp(*min);
 			*min = *(first + i);
 			*(first + i) = tmp;
 		}
