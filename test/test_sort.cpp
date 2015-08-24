@@ -1,5 +1,5 @@
 /**
- * Test case for sort algorithm.
+ * Test case for sorting algorithm.
  *
  * Copyright (c) 2015 Alex Jin (toalexjin@hotmail.com)
  */
