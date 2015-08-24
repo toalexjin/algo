@@ -7,6 +7,7 @@
 #pragma once
 
 #include "test/test.h"
+#include "algo/sort.h"
 #include <iostream>
 #include <iterator>
 #include <algorithm>
@@ -19,7 +20,7 @@ public:
 	virtual bool run();
 
 private:
-	template <class Ctner, class Less = std::less<>>
+	template <class Ctner, class Less = std::less<typename Ctner::value_type>>
 	bool run_single(const Ctner& raw, const Less& less = Less()) {
 
 		// Bubble sort.
@@ -42,7 +43,7 @@ private:
 		std::cout << std::endl;
 	}
 
-	template <class Iterator, class Less = std::less<>>
+	template <class Iterator, class Less = std::less<typename std::iterator_traits<Iterator>::value_type>>
 	bool verify(Iterator first, Iterator last, const Less& less = Less()) {
 		if (first == last) {
 			return true;

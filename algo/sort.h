@@ -12,7 +12,7 @@
 
 namespace algo {
 
-template <class Iterator, class Less = std::less<>>
+template <class Iterator, class Less = std::less<typename std::iterator_traits<Iterator>::value_type>>
 void inline bubble_sort(Iterator first, Iterator last, const Less& less = Less()) {
 	for (typename std::iterator_traits<Iterator>::difference_type i = 0; i < last - first - 1; ++i) {
 		for (auto k = first; k < last - 1 - i; ++k) {
