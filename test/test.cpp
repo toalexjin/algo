@@ -30,6 +30,9 @@ void test_manager_t::add(test_case_t* test) {
 }
 
 void test_manager_t::run_all() {
+	size_t success = 0;
+	size_t failed = 0;
+
 	for (auto it = m_tests.begin(); it != m_tests.end(); ++it) {
 		const auto& info(typeid(*(*it)));
 
@@ -38,7 +41,17 @@ void test_manager_t::run_all() {
 		std::cout << "----------- End <" << info.name() << ">: " << (result ? "Success" : "Failed") << " -----------" << std::endl;
 		std::cout << std::endl;
 		std::cout << std::endl;
+
+		if (result) {
+			++success;
+		}
+		else {
+			++failed;
+		}
 	}
+
+	std::cout << "Success: " << success << std::endl;
+	std::cout << "Failed: " << failed << std::endl;
 }
 
 test_manager_t::test_manager_t() {
