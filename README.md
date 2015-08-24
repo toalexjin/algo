@@ -6,8 +6,7 @@ C++ Template Algorithms and Containers.
 2. Click **Build** and **Start**.
 
 # Linux
-1. `make`
-2. `./testalgo`
-3. `make clean`
-
-
+1. Have g++ 4.8.4 (or above) installed.
+2. `make`
+3. `./testalgo`
+4. `make clean`

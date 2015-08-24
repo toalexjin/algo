@@ -1,5 +1,5 @@
 /**
-* Test case for sort algorithm.
+* Test case for sorting algorithm.
 *
 * Copyright (c) 2015 Alex Jin (toalexjin@hotmail.com)
 */
@@ -23,22 +23,36 @@ private:
 	template <class Ctner, class Less = std::less<typename Ctner::value_type>>
 	bool run_single(const Ctner& raw, const Less& less = Less()) {
 
-		// Bubble sort.
-		Ctner bubble(raw);
-		algo::bubble_sort(bubble.begin(), bubble.end(), less);
-		this->dump(bubble.begin(), bubble.end());
-		
-		if (bubble.size() != raw.size()
-			|| !this->verify(bubble.begin(), bubble.end(), less)) {
-			return false;
+		for (int i = algo::SORT_ALGO_BUBBLE; i <= (int)algo::SORT_ALGO_SELECTION; ++i) {
+			Ctner clone;
+
+			// ascending order.
+			clone = raw;
+			algo::sort((algo::sort_algo_t)i, clone.begin(), clone.end(), std::less<typename Ctner::value_type>());
+			this->dump(true, clone.begin(), clone.end());
+
+			if (clone.size() != raw.size()
+				|| !this->verify(clone.begin(), clone.end(), std::less<typename Ctner::value_type>())) {
+				return false;
+			}
+
+			// descending order.
+			clone = raw;
+			algo::sort((algo::sort_algo_t)i, clone.begin(), clone.end(), std::greater<typename Ctner::value_type>());
+			this->dump(false, clone.begin(), clone.end());
+
+			if (clone.size() != raw.size()
+				|| !this->verify(clone.begin(), clone.end(), std::greater<typename Ctner::value_type>())) {
+				return false;
+			}
 		}
 
 		return true;
 	}
 
 	template <class Iterator>
-	void dump(Iterator first, Iterator last) {
-		std::cout << "Sort result: ";
+	void dump(bool ascending, Iterator first, Iterator last) {
+		std::cout << (ascending ? "-->: " : "<--: ");
 		std::copy(first, last, std::ostream_iterator<typename std::iterator_traits<Iterator>::value_type>(std::cout, ","));
 		std::cout << std::endl;
 	}

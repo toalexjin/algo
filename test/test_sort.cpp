@@ -18,14 +18,19 @@ test_sort_t st_test_sort;
 
 
 bool test_sort_t::run() {
-	const std::vector<int> raw1;
-	if (!this->run_single(raw1)) {
-		return false;
-	}
+	std::vector<std::vector<int>> numbers;
 
-	const std::vector<int> raw2 = { 12, 13, 3, 19, 7, 20, 2, 18, 1, 17, 16, 9, 15, 10, 14, 8, 4, 11, 6, 5 };
-	if (!this->run_single(raw2)) {
-		return false;
+	numbers.push_back(std::vector<int>());
+	numbers.push_back(std::vector<int>({ 1 }));
+	numbers.push_back(std::vector<int>({ 2, 1 }));
+	numbers.push_back(std::vector<int>({ 2, 1, 2 }));
+	numbers.push_back(std::vector<int>({ 3, 6, 2, 1, 8, 10, 9, 4, 7, 5, 3, 6, 2, 1, 8, 10, 9, 4, 7, 5 }));
+	numbers.push_back(std::vector<int>({ 12, 13, 3, 19, 7, 20, 2, 18, 1, 17, 16, 9, 15, 10, 14, 8, 4, 11, 6, 5 }));
+
+	for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+		if (!this->run_single(*it)) {
+			return false;
+		}
 	}
 
 	return true;
