@@ -39,7 +39,7 @@ bool test_hanoi_t::run_single(size_t n) {
 		}
 	);
 
-	if (steps != (1 << n) - 1) {
+	if (steps != size_t((1 << n) - 1)) {
 		return false;
 	}
 

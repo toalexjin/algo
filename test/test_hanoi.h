@@ -7,6 +7,7 @@
 #pragma once
 
 #include "test/test.h"
+#include <stddef.h>
 
 
 // Test case for Tower of Hanoi.
