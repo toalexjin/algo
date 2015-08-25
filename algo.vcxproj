@@ -153,6 +153,7 @@
     <ClInclude Include="algo\hanoi.h" />
     <ClInclude Include="algo\hash_table.h" />
     <ClInclude Include="algo\key_traits.h" />
+    <ClInclude Include="algo\rbtree.h" />
     <ClInclude Include="algo\sort.h" />
     <ClInclude Include="test\test.h" />
     <ClInclude Include="test\test_hanoi.h" />
