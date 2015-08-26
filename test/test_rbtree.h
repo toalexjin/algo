@@ -31,6 +31,10 @@ private:
 			std::cout << "RB-Tree Size: " << tree_less.size() << std::endl;
 			this->dump("-->: ", tree_less.begin(), tree_less.end());
 			this->dump("<--: ", tree_less.rbegin(), tree_less.rend());
+
+			auto v1(tree_less);
+			this->dump("-->: ", v1.begin(), v1.end());
+			this->dump("<--: ", v1.rbegin(), v1.rend());
 		} while (0);
 
 		// Descending order.
@@ -40,6 +44,10 @@ private:
 			std::cout << "RB-Tree Size: " << tree_greater.size() << std::endl;
 			this->dump("<--: ", tree_greater.begin(), tree_greater.end());
 			this->dump("-->: ", tree_greater.rbegin(), tree_greater.rend());
+
+			auto v1(tree_greater);
+			this->dump("<--: ", v1.begin(), v1.end());
+			this->dump("-->: ", v1.rbegin(), v1.rend());
 		} while (0);
 
 		return true;

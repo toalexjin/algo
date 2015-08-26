@@ -66,8 +66,6 @@ namespace rbtree__ {
 		typedef ctner_t<T, Compare> self_type;
 		typedef T value_type;
 
-	private:
-
 	public:
 		ctner_t() : m_root(0), m_size(0) {
 		}
@@ -275,12 +273,12 @@ namespace rbtree__ {
 
 			if (another->m_left != 0) {
 				this->copy_i(&((*pptr)->m_left), another->m_left);
-				(*pptr)->m_left = *pptr;
+				(*pptr)->m_left->m_parent = *pptr;
 			}
 
 			if (another->m_right != 0) {
 				this->copy_i(&((*pptr)->m_right), another->m_right);
-				(*pptr)->m_right = *pptr;
+				(*pptr)->m_right->m_parent = *pptr;
 			}
 		}
 
@@ -427,6 +425,11 @@ public:
 
 	explicit rbtree_t(const Compare& less) {
 		m_ctner = new ctner_type(less);
+	}
+
+	rbtree_t(const self_type& another) {
+		m_ctner = new ctner_type();
+		*this = another;
 	}
 
 	virtual ~rbtree_t() {
