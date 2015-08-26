@@ -347,7 +347,7 @@ public:
 	}
 
 	value_compare value_comp() const {
-		this this->m_less;
+		return this->m_less;
 	}
 
 	iterator find(const T& value);
