@@ -33,17 +33,59 @@ namespace rbtree__ {
 		bool m_black;
 	};
 
-	// Internal data container.
+	enum find_result_t {
+		// There is no root node, the new value
+		// could be added as root node.
+		find_result_no_root,
+
+		// The value was not found, could be 
+		// added to the left leaf of parent node.
+		find_result_left,
+
+		// The value was not found, could be
+		// added to the right leaf of parent node.
+		find_result_right,
+
+		// The value was found.
+		find_result_yes
+	};
+
+	// Finding result.
 	template <class T>
-	struct ctner_t {
-		typedef ctner_t<T> self_type;
+	struct find_t {
+		find_t() : m_node_ptr(0), m_result(find_result_no_root) {}
+
+		node_t<T>* m_node_ptr;
+		find_result_t m_result;
+	};
+
+	// Internal data container.
+	template <class T, class Compare>
+	class ctner_t {
+	public:
+		typedef ctner_t<T, Compare> self_type;
 		typedef T value_type;
 
+	private:
+
+	public:
 		ctner_t() : m_root(0), m_size(0) {
+		}
+
+		explicit ctner_t(const Compare& less)
+			: m_root(0), m_size(0), m_less(less) {
 		}
 
 		~ctner_t() {
 			this->clear();
+		}
+
+		size_t size() const {
+			return this->m_size;
+		}
+
+		Compare key_compare() const {
+			return this->m_less;
 		}
 
 		void clear() {
@@ -54,18 +96,6 @@ namespace rbtree__ {
 			this->clear_i(m_root);
 			m_root = 0;
 			this->m_size = 0;
-		}
-
-		void clear_i(node_t<T>* node_ptr) {
-			if (node_ptr->m_left != 0) {
-				this->clear_i(node_ptr->m_left);
-			}
-
-			if (node_ptr->m_right != 0) {
-				this->clear_i(node_ptr->m_right);
-			}
-
-			delete node_ptr;
 		}
 
 		node_t<T>* get_smallest() const {
@@ -148,18 +178,116 @@ namespace rbtree__ {
 			return result_ptr;
 		}
 
-		self_type& swap(self_type& another) {
-			if (this != &another) {
-				auto tmp(*this);
-				*this = another;
-				another = tmp;
+		std::pair<node_t<T>*, bool> insert(const T& value) {
+			const auto found(this->find(value));
+
+			// The key already exists.
+			if (found.m_result == find_result_yes) {
+				return std::pair<node_t<T>*, bool>(found.m_node_ptr, false);
 			}
 
-			return *this;
+			// Create a new node.
+			auto new_ptr = new node_t<T>(value);
+			if (found.m_result == find_result_no_root) {
+				this->m_root = new_ptr;
+			}
+			else if (found.m_result == find_result_left) {
+				found.m_node_ptr->m_left = new_ptr;
+				new_ptr->m_parent = found.m_node_ptr;
+			}
+			else {
+				found.m_node_ptr->m_right = new_ptr;
+				new_ptr->m_parent = found.m_node_ptr;
+			}
+
+			this->m_size++;
+
+			// TO-DO: Rotate.
+			if (this->m_size > 2) {
+			}
+
+			return std::pair<node_t<T>*, bool>(new_ptr, true);
 		}
 
+		find_t<T> find(const T& value) const {
+			find_t<T> result;
+
+			auto ptr = (node_t<T>*) m_root;
+			while (ptr != 0) {
+				result.m_node_ptr = ptr;
+
+				if (this->m_less(value, ptr->m_value)) {
+					result.m_result = find_result_left;
+					ptr = ptr->m_left;
+				}
+				else if (this->m_less(ptr->m_value, value)) {
+					result.m_result = find_result_right;
+					ptr = ptr->m_right;
+				}
+				else {
+					result.m_result = find_result_yes;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		void erase(node_t<T>* node_ptr) {
+			// TO-DO.
+		}
+
+		void assign(self_type& another) {
+			if (this != &another) {
+				// Delete old data.
+				this->clear();
+
+				// Copy key-compare.
+				this->m_less = another.m_less;
+
+				// Copy nodes one by one.
+				if (another.m_root != 0) {
+					this->copy_i(&m_root, another.m_root);
+				}
+				this->m_size = another.m_size;
+			}
+		}
+
+	private:
+		// Disable copy contructor & operator=().
+		ctner_t(const self_type&);
+		self_type& operator=(const self_type&);
+
+		void clear_i(node_t<T>* node_ptr) {
+			if (node_ptr->m_left != 0) {
+				this->clear_i(node_ptr->m_left);
+			}
+
+			if (node_ptr->m_right != 0) {
+				this->clear_i(node_ptr->m_right);
+			}
+
+			delete node_ptr;
+		}
+
+		void copy_i(node_t<T>** pptr, const node_t<T>* another) {
+			*pptr = new node_t<T>(another->m_value);
+
+			if (another->m_left != 0) {
+				this->copy_i(&((*pptr)->m_left), another->m_left);
+				(*pptr)->m_left = *pptr;
+			}
+
+			if (another->m_right != 0) {
+				this->copy_i(&((*pptr)->m_right), another->m_right);
+				(*pptr)->m_right = *pptr;
+			}
+		}
+
+	private:
 		node_t<T>* m_root;
 		size_t m_size;
+		Compare m_less;
 	};
 
 	// Iterator implementation.
@@ -259,32 +387,6 @@ namespace rbtree__ {
 		NodePointer m_current;
 	};
 
-	enum find_result_t {
-		// There is no root node, the new value
-		// could be added as root node.
-		find_result_no_root,
-
-		// The value was not found, could be 
-		// added to the left leaf of parent node.
-		find_result_left,
-
-		// The value was not found, could be
-		// added to the right leaf of parent node.
-		find_result_right,
-
-		// The value was found.
-		find_result_yes
-	};
-
-	// Finding result.
-	template <class T>
-	struct find_t {
-		find_t() : m_node_ptr(0), m_result(find_result_no_root) {}
-
-		node_t<T>* m_node_ptr;
-		find_result_t m_result;
-	};
-
 } // namespace rbtree__
 
 
@@ -297,6 +399,7 @@ private:
 	typedef rbtree_t<T, Compare> self_type;
 	typedef rbtree__::node_t<T>* node_ptr_t;
 	typedef const rbtree__::node_t<T>* const_node_ptr_t;
+	typedef rbtree__::ctner_t<T, Compare> ctner_type;
 
 public:
 	typedef Compare key_compare;
@@ -310,24 +413,29 @@ public:
 	typedef value_type* pointer;
 	typedef const value_type* const_pointer;
 
-	typedef rbtree__::iterator_t<value_type, pointer, reference,
-		rbtree__::ctner_t<value_type>*, node_ptr_t> iterator;
-	typedef rbtree__::iterator_t<value_type, const_pointer, const_reference,
-		const rbtree__::ctner_t<value_type>*, const_node_ptr_t> const_iterator;
+	typedef rbtree__::iterator_t<value_type, pointer,
+		reference, ctner_type*, node_ptr_t> iterator;
+	typedef rbtree__::iterator_t<value_type, const_pointer,
+		const_reference, const ctner_type*, const_node_ptr_t> const_iterator;
 	typedef std::reverse_iterator<iterator> reverse_iterator;
 	typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
 
 public:
-	rbtree_t() {}
+	rbtree_t() {
+		m_ctner = new ctner_type();
+	}
 
-	explicit rbtree_t(const Compare& less) : m_less(less) {
+	explicit rbtree_t(const Compare& less) {
+		m_ctner = new ctner_type(less);
 	}
 
 	virtual ~rbtree_t() {
+		delete m_ctner;
+		m_ctner = 0;
 	}
 
 	size_t size() const {
-		return this->m_ctner.m_size;
+		return this->m_ctner->size();
 	}
 
 	size_t max_size() const {
@@ -335,19 +443,19 @@ public:
 	}
 
 	bool empty() const {
-		return this->m_ctner.m_size == 0;
+		return this->size() == 0;
 	}
 
 	void clear() {
-		this->m_ctner.clear();
+		this->m_ctner->clear();
 	}
 
 	key_compare key_comp() const {
-		return this->m_less;
+		return this->m_ctner->key_compare();
 	}
 
 	value_compare value_comp() const {
-		return this->m_less;
+		return this->key_comp();
 	}
 
 	iterator find(const T& value);
@@ -379,72 +487,48 @@ public:
 	self_type& swap(self_type& another);
 
 private:
-	rbtree__::find_t<T> find_i(const T& value) const;
-	void erase_i(node_ptr_t node);
-
-private:
-	rbtree__::ctner_t<value_type> m_ctner;
-	key_compare m_less;
+	rbtree__::ctner_t<T, Compare>* m_ctner;
 };
 
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::iterator rbtree_t<T, Compare>::find(const T& value) {
-	auto found(this->find_i(value));
+	const auto found(this->m_ctner->find(value));
 
-	return iterator(&this->m_ctner,
-		found.m_result == rbtree__::find_result_yes ? found.m_node_ptr : 0);
+	if (found.m_result == rbtree__::find_result_yes) {
+		return iterator(this->m_ctner, found.m_node_ptr);
+	}
+	else {
+		return iterator(this->m_ctner);
+	}
 }
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::const_iterator rbtree_t<T, Compare>::find(const T& value) const {
-	auto found(this->find_i(value));
+	const auto found(this->m_ctner->find(value));
 
-	return const_iterator(&this->m_ctner,
-		found.m_result == rbtree__::find_result_yes ? found.m_node_ptr : 0);
+	if (found.m_result == rbtree__::find_result_yes) {
+		return const_iterator(this->m_ctner, found.m_node_ptr);
+	}
+	else {
+		return const_iterator(this->m_ctner);
+	}
 }
 
 template <class T, class Compare>
 inline std::pair<typename rbtree_t<T, Compare>::iterator, bool> rbtree_t<T, Compare>::insert(const T& value) {
-	const auto found(this->find_i(value));
-
-	// The key already exists.
-	if (found.m_result == rbtree__::find_result_yes) {
-		return std::pair<typename rbtree_t<T, Compare>::iterator, bool>(
-			iterator(&this->m_ctner, found.m_node_ptr), false);
-	}
-
-	// Create a new node.
-	auto new_ptr = new rbtree__::node_t<T>(value);
-	if (found.m_result == rbtree__::find_result_no_root) {
-		this->m_ctner.m_root = new_ptr;
-	}
-	else if (found.m_result == rbtree__::find_result_left) {
-		found.m_node_ptr->m_left = new_ptr;
-		new_ptr->m_parent = found.m_node_ptr;
-	}
-	else {
-		found.m_node_ptr->m_right = new_ptr;
-		new_ptr->m_parent = found.m_node_ptr;
-	}
-
-	this->m_ctner.m_size++;
-
-	// TO-DO: Rotate.
-	if (this->m_ctner.m_size > 2) {
-	}
+	auto result = this->m_ctner->insert(value);
 
 	return std::pair<typename rbtree_t<T, Compare>::iterator, bool>(
-		iterator(&this->m_ctner, new_ptr), true);
+		iterator(this->m_ctner, result.first), result.second);
 }
 
 template <class T, class Compare>
-inline void rbtree_t<T, Compare>::erase(
-	typename rbtree_t<T, Compare>::iterator it) {
-	if (it.get_ctner_ptr__() == &this->m_ctner) {
+inline void rbtree_t<T, Compare>::erase(typename rbtree_t<T, Compare>::iterator it) {
+	if (it.get_ctner_ptr__() == this->m_ctner) {
 		// Same container.
 		assert(it != this->end());
-		this->erase_i(it.get_node_ptr__());
+		this->m_ctner->erase(it.get_node_ptr__());
 	}
 	else {
 		// Different container.
@@ -463,34 +547,34 @@ inline void rbtree_t<T, Compare>::erase(
 
 template <class T, class Compare>
 inline size_t rbtree_t<T, Compare>::erase(const T& value) {
-	const auto found(this->find_i(value));
+	const auto found(this->m_ctner->find(value));
 
 	if (found.m_result != rbtree__::find_result_yes) {
 		return 0;
 	}
 
-	this->erase_i(found.m_node_ptr);
+	this->m_ctner->erase(found.m_node_ptr);
 	return 1;
 }
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::iterator rbtree_t<T, Compare>::begin() {
-	return iterator(&this->m_ctner, this->m_ctner.get_smallest());
+	return iterator(this->m_ctner, this->m_ctner->get_smallest());
 }
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::iterator rbtree_t<T, Compare>::end() {
-	return iterator(&this->m_ctner);
+	return iterator(this->m_ctner);
 }
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::const_iterator rbtree_t<T, Compare>::begin() const {
-	return const_iterator(&this->m_ctner, this->m_ctner.get_smallest());
+	return const_iterator(this->m_ctner, this->m_ctner->get_smallest());
 }
 
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::const_iterator rbtree_t<T, Compare>::end() const {
-	return const_iterator(&this->m_ctner);
+	return const_iterator(this->m_ctner);
 }
 
 template <class T, class Compare>
@@ -516,15 +600,7 @@ inline typename rbtree_t<T, Compare>::reverse_const_iterator rbtree_t<T, Compare
 template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::self_type& rbtree_t<T, Compare>::operator=(
 	const typename rbtree_t<T, Compare>::self_type& another) {
-	if (this != &another) {
-		// Remove all old data.
-		this->clear();
-
-		// Copy key-compare & new data.
-		this->m_less = another.m_less;
-		this->insert(another.begin(), another.end());
-	}
-
+	this->m_ctner->assign(*(another.m_ctner));
 	return *this;
 }
 
@@ -532,46 +608,12 @@ template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::self_type& rbtree_t<T, Compare>::swap(
 	typename rbtree_t<T, Compare>::self_type& another) {
 	if (this != &another) {
-		// Swap data.
-		this->m_ctner.swap(&another.m_ctner);
-		
-		// Swap key-compare.
-		auto tmp(this->m_less);
-		this->m_less = another.m_less;
-		another.m_less = tmp;
+		auto tmp(this->m_ctner);
+		this->m_ctner = another.m_ctner;
+		another.m_ctner = this->m_ctner;
 	}
 
 	return *this;
-}
-
-template <class T, class Compare>
-inline rbtree__::find_t<T> rbtree_t<T, Compare>::find_i(const T& value) const {
-	rbtree__::find_t<T> result;
-
-	auto ptr = node_ptr_t(this->m_ctner.m_root);
-	while (ptr != 0) {
-		result.m_node_ptr = ptr;
-
-		if (this->m_less(value, ptr->m_value)) {
-			result.m_result = rbtree__::find_result_left;
-			ptr = ptr->m_left;
-		}
-		else if (this->m_less(ptr->m_value, value)) {
-			result.m_result = rbtree__::find_result_right;
-			ptr = ptr->m_right;
-		}
-		else {
-			result.m_result = rbtree__::find_result_yes;
-			break;
-		}
-	}
-
-	return result;
-}
-
-template <class T, class Compare>
-inline void rbtree_t<T, Compare>::erase_i(typename rbtree_t<T, Compare>::node_ptr_t node) {
-	// TO-DO.
 }
 
 } // namespace algo
