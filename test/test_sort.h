@@ -17,6 +17,7 @@
 // Test case for sorting algorithm.
 class test_sort_t : public test_case_t {
 public:
+	test_sort_t() : test_case_t("test_sort_t") {}
 	virtual bool run();
 
 private:

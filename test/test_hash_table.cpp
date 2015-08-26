@@ -10,7 +10,7 @@
 
 namespace {
 
-test_hash_table_t st_test_hash_table;
+test_hash_table_t st_test;
 
 } // unnamed namespace.
 

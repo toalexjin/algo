@@ -7,11 +7,12 @@
 #include "test/test_hanoi.h"
 #include "algo/hanoi.h"
 #include <iostream>
+#include <vector>
 
 
 namespace {
 
-test_hanoi_t st_test_hanoi;
+test_hanoi_t st_test;
 
 } // unnamed namespace.
 

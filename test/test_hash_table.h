@@ -18,6 +18,7 @@ private:
 	typedef algo::hash_table_t<std::string, std::string> my_table_t;
 
 public:
+	test_hash_table_t() : test_case_t("test_hash_table_t") {}
 	virtual bool run();
 
 private:

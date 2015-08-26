@@ -158,6 +158,7 @@
     <ClInclude Include="test\test.h" />
     <ClInclude Include="test\test_hanoi.h" />
     <ClInclude Include="test\test_hash_table.h" />
+    <ClInclude Include="test\test_rbtree.h" />
     <ClInclude Include="test\test_sort.h" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClCompile Include="test\test.cpp" />
     <ClCompile Include="test\test_hanoi.cpp" />
     <ClCompile Include="test\test_hash_table.cpp" />
+    <ClCompile Include="test\test_rbtree.cpp" />
     <ClCompile Include="test\test_sort.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

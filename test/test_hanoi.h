@@ -13,6 +13,7 @@
 // Test case for Tower of Hanoi.
 class test_hanoi_t : public test_case_t {
 public:
+	test_hanoi_t() : test_case_t("test_hanoi_t") {}
 	virtual bool run();
 
 private:
