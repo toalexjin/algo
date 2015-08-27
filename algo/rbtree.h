@@ -625,7 +625,7 @@ inline typename rbtree_t<T, Compare>::self_type& rbtree_t<T, Compare>::swap(
 namespace std {
 
 // Override std::swap() to offer better performance.
-template <class T, class Compare = std::less<T>>
+template <class T, class Compare>
 inline void swap(algo::rbtree_t<T, Compare>& v1, algo::rbtree_t<T, Compare>& v2) {
 	v1.swap(v2);
 }
