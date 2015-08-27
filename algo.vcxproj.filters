@@ -45,10 +45,10 @@
     <ClInclude Include="test\test_rbtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="algo\number.h">
+    <ClInclude Include="algo\algorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="test\test_number.h">
+    <ClInclude Include="test\test_algorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,7 +71,10 @@
     <ClCompile Include="test\test_rbtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test\test_number.cpp">
+    <ClCompile Include="algo\algorithm.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test_algorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,6 +17,8 @@ namespace algo {
  *
  * The goal is to move all disks from A to C.
  * 
+ * Functor prototype: void functor(char from, char to);
+ *
  * @return Number of steps.
  */
 template <class Functor>

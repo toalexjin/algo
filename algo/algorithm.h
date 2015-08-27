@@ -1,10 +1,14 @@
 /**
- * Number calculation.
+ * Algorithms.
  *
  * Copyright (c) 2015 Alex Jin (toalexjin@hotmail.com)
  */
 
 #pragma once
+
+#include <vector>
+#include <utility>
+
 
 namespace algo {
 
@@ -35,7 +39,7 @@ namespace number__ {
 /**
  * Calculate all possible number combinations.
  *
- * For instance: n is 3, then output will be "123", "132", "213", "231", "312", "321".
+ * For instance: "n" is 3, then output will be "123", "132", "213", "231", "312", "321".
  *
  * Functor prototype: void functor(const int* numbers, int n);
  */
@@ -53,6 +57,24 @@ inline void number_combinations(int n, const Functor& functor) {
 	delete[] numbers;
 	delete[] flags;
 }
+
+enum search_type_t {
+	// Breadth first search.
+	search_type_bfs,
+
+	// Depth first search.
+	search_type_dfs
+};
+
+/**
+ * Calculate island size.
+ *
+ * "area" contains data, 0 means sea and 1 means land.
+ */
+std::vector<std::pair<int, int>> island_size(
+	search_type_t type,	const int* area,
+	int row_size, int column_size,
+	int row_position, int column_position);
 
 } // namespace algo
 
