@@ -152,12 +152,14 @@
   <ItemGroup>
     <ClInclude Include="algo\hanoi.h" />
     <ClInclude Include="algo\hash_table.h" />
+    <ClInclude Include="algo\number.h" />
     <ClInclude Include="algo\key_traits.h" />
     <ClInclude Include="algo\rbtree.h" />
     <ClInclude Include="algo\sort.h" />
     <ClInclude Include="test\test.h" />
     <ClInclude Include="test\test_hanoi.h" />
     <ClInclude Include="test\test_hash_table.h" />
+    <ClInclude Include="test\test_number.h" />
     <ClInclude Include="test\test_rbtree.h" />
     <ClInclude Include="test\test_sort.h" />
   </ItemGroup>
@@ -166,6 +168,7 @@
     <ClCompile Include="test\test.cpp" />
     <ClCompile Include="test\test_hanoi.cpp" />
     <ClCompile Include="test\test_hash_table.cpp" />
+    <ClCompile Include="test\test_number.cpp" />
     <ClCompile Include="test\test_rbtree.cpp" />
     <ClCompile Include="test\test_sort.cpp" />
   </ItemGroup>
