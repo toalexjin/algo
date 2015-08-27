@@ -304,7 +304,7 @@ namespace rbtree__ {
 			*this = it;
 		}
 
-		iterator_t(CtnerPointer ctner)
+		explicit iterator_t(CtnerPointer ctner)
 			: m_ctner(ctner), m_current(0) {
 		}
 
