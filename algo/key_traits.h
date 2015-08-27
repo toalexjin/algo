@@ -15,11 +15,11 @@ namespace algo {
 template <class Key>
 class key_traits_t {
 public:
-	static size_t hash(const Key& key) {
+	size_t hash(const Key& key) const {
 		return (size_t)key;
 	}
 
-	static bool equal(const Key& key1, const Key& key2) {
+	bool equal(const Key& key1, const Key& key2) const {
 		return key1 == key2;
 	}
 };
@@ -28,7 +28,7 @@ public:
 template <class Char, class CharTraits, class Allocator>
 class key_traits_t<std::basic_string<Char, CharTraits, Allocator>> {
 public:
-	static size_t hash(const std::basic_string<Char, CharTraits, Allocator>& key) {
+	size_t hash(const std::basic_string<Char, CharTraits, Allocator>& key) const {
 		size_t value = 0;
 
 		for (auto it = key.c_str(); *it != 0; ++it) {
@@ -38,8 +38,8 @@ public:
 		return value;
 	}
 
-	static bool equal(const std::basic_string<Char, CharTraits, Allocator>& key1,
-		const std::basic_string<Char, CharTraits, Allocator>& key2) {
+	bool equal(const std::basic_string<Char, CharTraits, Allocator>& key1,
+		const std::basic_string<Char, CharTraits, Allocator>& key2) const {
 		return key1 == key2;
 	}
 };

@@ -27,7 +27,7 @@ namespace hash_table__ {
 		std::pair<const Key, T> m_value;
 	};
 
-	template <class Key, class T>
+	template <class Key, class T, class KeyTraits>
 	struct ctner_t {
 		struct link_t {
 			node_t<Key, T>* m_first;
@@ -70,19 +70,10 @@ namespace hash_table__ {
 			m_size = 0;
 		}
 
-		ctner_t<Key, T>& swap(ctner_t<Key, T>& another) {			
-			if (this != &another) {
-				auto tmp = *this;
-				*this = another;
-				another = tmp;
-			}
-
-			return *this;
-		}
-
 		link_t* m_array;
 		size_t m_array_size;
 		size_t m_size;
+		KeyTraits m_key_traits;
 	};
 
 
@@ -212,6 +203,18 @@ namespace hash_table__ {
 		NodePointer m_current;
 		int m_index;
 	};
+
+	template <class Key, class T>
+	struct find_t {
+		find_t() : m_node_ptr(0), m_index(0) {
+		}
+
+		find_t(node_t<Key, T>* node_ptr, size_t index) : m_node_ptr(node_ptr), m_index(index) {
+		}
+
+		node_t<Key, T>* m_node_ptr;
+		size_t m_index;
+	};
 }
 
 
@@ -222,6 +225,7 @@ private:
 	typedef hash_table_t<Key, T, KeyTraits> self_type;
 	typedef hash_table__::node_t<Key, T>* node_ptr_t;
 	typedef const hash_table__::node_t<Key, T>* const_node_ptr_t;
+	typedef hash_table__::ctner_t<Key, T, KeyTraits> ctner_type;
 
 public:
 	typedef Key key_type;
@@ -235,45 +239,51 @@ public:
 	typedef value_type* pointer;
 	typedef const value_type* const_pointer;
 	typedef hash_table__::iterator_t<Key, T, pointer, reference,
-		hash_table__::ctner_t<Key, T>*, node_ptr_t> iterator;
+		ctner_type*, node_ptr_t> iterator;
 	typedef hash_table__::iterator_t<Key, T, const_pointer, const_reference,
-		const hash_table__::ctner_t<Key, T>*, const_node_ptr_t> const_iterator;
+		const ctner_type*, const_node_ptr_t> const_iterator;
 	typedef std::reverse_iterator<iterator> reverse_iterator;
 	typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
 
-	struct found_t {
-		found_t() : m_node_ptr(0), m_index(0) {
-		}
-
-		found_t(node_ptr_t node, size_t index) : m_node_ptr(node), m_index(index) {
-		}
-
-		node_ptr_t m_node_ptr;
-		size_t m_index;
-	};
-
 public:
 	hash_table_t() {
-		this->m_ctner.reset(256);
+		this->m_ctner = new ctner_type();
+		this->m_ctner->reset(256);
 	}
 
 	hash_table_t(const self_type& another) {
+		this->m_ctner = new ctner_type();
 		*this = another;
 	}
 
 	explicit hash_table_t(size_t array_size) {
-		this->m_ctner.reset(array_size);
+		assert(array_size > 0);
+		this->m_ctner = new ctner_type();
+		this->m_ctner->reset(array_size);
+	}
+
+	explicit hash_table_t(const KeyTraits& key_traits, size_t array_size = 256) {
+		assert(array_size > 0);
+		this->m_ctner = new ctner_type();
+		this->m_ctner->reset(array_size);
+		this->m_ctner->m_key_traits = key_traits;
 	}
 
 	virtual ~hash_table_t() {
+		delete this->m_ctner;
+		this->m_ctner = 0;
 	}
 
 	size_t size() const {
-		return this->m_ctner.m_size;
+		return this->m_ctner->m_size;
 	}
 
 	bool empty() const {
-		return this->m_ctner.m_size == 0;
+		return this->size() == 0;
+	}
+
+	key_traits key_comp() const {
+		return this->m_ctner->m_key_traits;
 	}
 
 	void clear();
@@ -299,56 +309,56 @@ public:
 	self_type& swap(self_type& another);
 
 private:
-	found_t find_i(const Key& key) const;
+	hash_table__::find_t<Key, T> find_i(const Key& key) const;
 
 private:
-	hash_table__::ctner_t<Key, T> m_ctner;
+	ctner_type* m_ctner;
 };
 
 
 template <class Key, class T, class KeyTraits>
 inline void hash_table_t<Key, T, KeyTraits>::clear() {
-	this->m_ctner.clear();
+	this->m_ctner->clear();
 }
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::iterator hash_table_t<Key, T, KeyTraits>::find(const Key& key) {
 	const auto found(this->find_i(key));
 
-	return iterator(&this->m_ctner, found.m_node_ptr, (int)found.m_index);
+	return iterator(this->m_ctner, found.m_node_ptr, (int)found.m_index);
 }
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::const_iterator hash_table_t<Key, T, KeyTraits>::find(const Key& key) const {
 	const auto found(this->find_i(key));
 
-	return const_iterator(&this->m_ctner, found.m_node_ptr, (int)found.m_index);
+	return const_iterator(this->m_ctner, found.m_node_ptr, (int)found.m_index);
 }
 
 template <class Key, class T, class KeyTraits>
 inline std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool> hash_table_t<Key, T, KeyTraits>::insert(const Key& key, const T& value) {
-	const auto index = KeyTraits::hash(key) % m_ctner.m_array_size;
+	const auto index = this->m_ctner->m_key_traits.hash(key) % m_ctner->m_array_size;
 
-	for (auto ptr = m_ctner.m_array[index].m_first; ptr != 0; ptr = ptr->m_next) {
-		if (KeyTraits::equal(ptr->m_value.first, key)) {
-			return std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool>(iterator(&m_ctner, ptr, (int)index), false);
+	for (auto ptr = m_ctner->m_array[index].m_first; ptr != 0; ptr = ptr->m_next) {
+		if (this->m_ctner->m_key_traits.equal(ptr->m_value.first, key)) {
+			return std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool>(iterator(m_ctner, ptr, (int)index), false);
 		}
 	}
 
 	auto new_ptr = new hash_table__::node_t<Key, T>(key, value);
 
-	if (m_ctner.m_array[index].m_first == 0) {
-		m_ctner.m_array[index].m_first = new_ptr;
-		m_ctner.m_array[index].m_last = new_ptr;
+	if (m_ctner->m_array[index].m_first == 0) {
+		m_ctner->m_array[index].m_first = new_ptr;
+		m_ctner->m_array[index].m_last = new_ptr;
 	}
 	else {
-		m_ctner.m_array[index].m_last->m_next = new_ptr;
-		new_ptr->m_prev = m_ctner.m_array[index].m_last;
-		m_ctner.m_array[index].m_last = new_ptr;
+		m_ctner->m_array[index].m_last->m_next = new_ptr;
+		new_ptr->m_prev = m_ctner->m_array[index].m_last;
+		m_ctner->m_array[index].m_last = new_ptr;
 	}
 
-	m_ctner.m_size++;
-	return std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool>(iterator(&m_ctner, new_ptr, (int)index), true);
+	m_ctner->m_size++;
+	return std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool>(iterator(m_ctner, new_ptr, (int)index), true);
 }
 
 template <class Key, class T, class KeyTraits>
@@ -367,25 +377,25 @@ inline size_t hash_table_t<Key, T, KeyTraits>::erase(const Key& key) {
 		found.m_node_ptr->m_next->m_prev = found.m_node_ptr->m_prev;
 	}
 
-	if (m_ctner.m_array[found.m_index].m_first == found.m_node_ptr) {
-		m_ctner.m_array[found.m_index].m_first = found.m_node_ptr->m_next;
+	if (m_ctner->m_array[found.m_index].m_first == found.m_node_ptr) {
+		m_ctner->m_array[found.m_index].m_first = found.m_node_ptr->m_next;
 	}
 
-	if (m_ctner.m_array[found.m_index].m_last == found.m_node_ptr) {
-		m_ctner.m_array[found.m_index].m_last = found.m_node_ptr->m_prev;
+	if (m_ctner->m_array[found.m_index].m_last == found.m_node_ptr) {
+		m_ctner->m_array[found.m_index].m_last = found.m_node_ptr->m_prev;
 	}
 
 	delete found.m_node_ptr;
-	this->m_ctner.m_size--;
+	this->m_ctner->m_size--;
 
 	return 1;
 }
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::iterator hash_table_t<Key, T, KeyTraits>::begin() {
-	for (int i = 0; i < (int) this->m_ctner.m_array_size; ++i) {
-		if (m_ctner.m_array[i].m_first != 0) {
-			return iterator(&m_ctner, m_ctner.m_array[i].m_first, i);
+	for (int i = 0; i < (int) this->m_ctner->m_array_size; ++i) {
+		if (m_ctner->m_array[i].m_first != 0) {
+			return iterator(m_ctner, m_ctner->m_array[i].m_first, i);
 		}
 	}
 
@@ -394,14 +404,14 @@ inline typename hash_table_t<Key, T, KeyTraits>::iterator hash_table_t<Key, T, K
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::iterator hash_table_t<Key, T, KeyTraits>::end() {
-	return iterator(&m_ctner, 0, (int)m_ctner.m_array_size);
+	return iterator(m_ctner, 0, (int)m_ctner->m_array_size);
 }
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::const_iterator hash_table_t<Key, T, KeyTraits>::begin() const {
-	for (int i = 0; i < (int) this->m_ctner.m_array_size; ++i) {
-		if (m_ctner.m_array[i].m_first != 0) {
-			return const_iterator(&m_ctner, m_ctner.m_array[i].m_first, i);
+	for (int i = 0; i < (int) this->m_ctner->m_array_size; ++i) {
+		if (m_ctner->m_array[i].m_first != 0) {
+			return const_iterator(m_ctner, m_ctner->m_array[i].m_first, i);
 		}
 	}
 
@@ -410,7 +420,7 @@ inline typename hash_table_t<Key, T, KeyTraits>::const_iterator hash_table_t<Key
 
 template <class Key, class T, class KeyTraits>
 inline typename hash_table_t<Key, T, KeyTraits>::const_iterator hash_table_t<Key, T, KeyTraits>::end() const {
-	return const_iterator(&m_ctner, 0, (int)m_ctner.m_array_size);
+	return const_iterator(m_ctner, 0, (int)m_ctner->m_array_size);
 }
 
 template <class Key, class T, class KeyTraits>
@@ -438,7 +448,7 @@ inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T,
 	const typename hash_table_t<Key, T, KeyTraits>::self_type& another) {
 
 	if (this != &another) {
-		this->m_ctner.reset(another.m_ctner.m_array_size);
+		this->m_ctner->reset(another.m_ctner->m_array_size);
 		for (const_iterator it = another.begin(); it != another.end(); ++it) {
 			this->insert(it->first, it->second);
 		}
@@ -452,7 +462,9 @@ inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T,
 	typename hash_table_t<Key, T, KeyTraits>::self_type& another) {
 
 	if (this != &another) {
-		this->m_ctner.swap(&another.m_ctner);
+		auto tmp(this->m_ctner);
+		this->m_ctner = another.m_ctner;
+		another.m_ctner = tmp;
 	}
 
 	return *this;
@@ -470,16 +482,27 @@ inline T& hash_table_t<Key, T, KeyTraits>::operator[](const key_type& key) {
 }
 
 template <class Key, class T, class KeyTraits>
-inline typename hash_table_t<Key, T, KeyTraits>::found_t hash_table_t<Key, T, KeyTraits>::find_i(const Key& key) const {
-	const auto index = KeyTraits::hash(key) % m_ctner.m_array_size;
+inline hash_table__::find_t<Key, T> hash_table_t<Key, T, KeyTraits>::find_i(const Key& key) const {
+	const auto index = this->m_ctner->m_key_traits.hash(key) % m_ctner->m_array_size;
 
-	for (auto ptr = m_ctner.m_array[index].m_first; ptr != 0; ptr = ptr->m_next) {
-		if (KeyTraits::equal(ptr->m_value.first, key)) {
-			return found_t((node_ptr_t) ptr, index);
+	for (auto ptr = m_ctner->m_array[index].m_first; ptr != 0; ptr = ptr->m_next) {
+		if (this->m_ctner->m_key_traits.equal(ptr->m_value.first, key)) {
+			return hash_table__::find_t<Key, T>((node_ptr_t) ptr, index);
 		}
 	}
 
-	return found_t(0, m_ctner.m_array_size);
+	return hash_table__::find_t<Key, T>(0, m_ctner->m_array_size);
 }
 
 } // namespace algo
+
+
+namespace std {
+
+// Override std::swap() to offer better performance.
+template <class Key, class T, class KeyTraits>
+inline void swap(algo::hash_table_t<Key, T, KeyTraits>& v1, algo::hash_table_t<Key, T, KeyTraits>& v2) {
+	v1.swap(v2);
+}
+
+}
