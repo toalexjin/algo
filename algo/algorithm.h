@@ -58,23 +58,24 @@ inline void number_combinations(int n, const Functor& functor) {
 	delete[] flags;
 }
 
-enum search_type_t {
+enum search_strategy_t {
 	// Breadth first search.
-	search_type_bfs,
+	SEARCH_STRATEGY_BFS,
 
 	// Depth first search.
-	search_type_dfs
+	SEARCH_STRATEGY_DFS
 };
 
 /**
- * Calculate island size.
+ * Search single island area.
  *
- * "area" contains data, 0 means sea and 1 means land.
+ * "area" is a two dimensional array, 0 means sea and 1 means land.
  */
-std::vector<std::pair<int, int>> island_size(
-	search_type_t type,	const int* area,
+void search_single_island(
+	search_strategy_t strategy,	const int* area,
 	int row_size, int column_size,
-	int row_position, int column_position);
+	int row_position, int column_position,
+	std::vector<std::pair<int, int>>* island_area);
 
 } // namespace algo
 

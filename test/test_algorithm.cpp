@@ -6,6 +6,7 @@
 
 #include "test/test_algorithm.h"
 #include "algo/algorithm.h"
+#include "algo/sort.h"
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -19,6 +20,7 @@ test_algorithm_t st_test;
 
 
 const int test_algorithm_t::st_area[AREA_ROW_SIZE][AREA_COLUMN_SIZE] = {
+	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 0
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 1
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 2
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 3
@@ -28,8 +30,7 @@ const int test_algorithm_t::st_area[AREA_ROW_SIZE][AREA_COLUMN_SIZE] = {
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 7
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 8
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 9
-	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 10
-	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }  // 11
+	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }  // 10
 };
 
 
@@ -71,23 +72,51 @@ bool test_algorithm_t::test_island_size() {
 	std::vector<std::pair<int, int>> numbers;
 
 	numbers.push_back(std::pair<int, int>(0, 0));
+	numbers.push_back(std::pair<int, int>(1, 1));
 	numbers.push_back(std::pair<int, int>(5, 5));
+	numbers.push_back(std::pair<int, int>(8, 8));
 	numbers.push_back(std::pair<int, int>(9, 9));
 
 	for (auto it = numbers.begin(); it != numbers.end(); ++it) {
 		std::cout << "Island Position: " << (*it).first << "," << (*it).second << std::endl;
 
-		const auto v1 = algo::island_size(algo::search_type_bfs, (int*)st_area,
-			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second);
+		std::vector<std::pair<int, int>> result[2];
+		algo::search_single_island(algo::SEARCH_STRATEGY_BFS, (int*)st_area,
+			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second, &result[0]);
 
-		const auto v2 = algo::island_size(algo::search_type_dfs, (int*)st_area,
-			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second);
+		std::vector<std::pair<int, int>> v2;
+		algo::search_single_island(algo::SEARCH_STRATEGY_DFS, (int*)st_area,
+			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second, &result[1]);
 
-		if (v1.size() != v2.size()) {
-			return false;
+		// Less function.
+		auto less = [](const std::pair<int, int>& n1, const std::pair<int, int>& n2) -> bool {
+			if (n1.first < n2.first) {
+				return true;
+			}
+
+			if (n1.first > n2.first) {
+				return false;
+			}
+
+			return n1.second < n2.second;
+		};
+
+		for (auto k = 0; k < 2; ++k) {
+			algo::sort(algo::SORT_ALGO_QUICK, result[k].begin(), result[k].end(), less);
+
+			std::cout << "Island Size: " << result[k].size() << std::endl;
+			std::cout << "Island Area: ";
+
+			for (auto ptr = result[k].begin(); ptr != result[k].end(); ++ptr) {
+				std::cout << "[" << (*ptr).first << "," << (*ptr).second << "] ";
+			}
+			std::cout << std::endl;
 		}
 
-		std::cout << "Island Size: " << v1.size() << std::endl;
+		if (result[0] != result[1]) {
+			std::cout << "BFS and DFS' results are different!!" << std::endl;
+			return false;
+		}
 	}
 
 	return true;
