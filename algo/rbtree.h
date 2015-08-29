@@ -278,7 +278,20 @@ namespace rbtree__ {
 		void erase(node_t<T>* node_ptr) {
 			assert(this->is_valid());
 
-			auto parent_ptr = node_ptr->m_parent;
+			// Update smallest & biggest node pointers first.
+			if (this->m_size == 1) {
+				this->m_smallest = 0;
+				this->m_biggest = 0;
+			}
+			else {
+				if (this->m_smallest == node_ptr) {
+					this->m_smallest = this->next(node_ptr);
+				}
+
+				if (this->m_biggest == node_ptr) {
+					this->m_biggest = this->prev(node_ptr);
+				}
+			}
 
 			if (node_ptr->m_left == 0) {
 				this->replace_subtree(node_ptr, node_ptr->m_right);
@@ -298,17 +311,6 @@ namespace rbtree__ {
 				this->replace_subtree(node_ptr, next_ptr);
 				next_ptr->m_left = node_ptr->m_left;
 				next_ptr->m_left->m_parent = next_ptr;
-			}
-
-			// Update smallest & biggest nodes.
-			if (this->m_smallest == node_ptr) {
-				this->m_smallest = this->get_smallest_i(
-					parent_ptr == 0 ? this->m_root : parent_ptr);
-			}
-			
-			if (this->m_biggest == node_ptr) {
-				this->m_biggest = this->get_biggest_i(
-					parent_ptr == 0 ? this->m_root : parent_ptr);
 			}
 
 			this->m_size--;
