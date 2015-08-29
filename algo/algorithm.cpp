@@ -164,7 +164,9 @@ void dijkstra(const int* matrix, int node_size,
 
 		// Find which node is the closest to the source node.
 		for (auto k = 0; k < node_size; ++k) {
-			if (!flags[k] && distance[k].m_distance < min_value) {
+			if (!flags[k]
+				&& distance[k].m_distance != distance_t::const_unreachable
+				&& distance[k].m_distance < min_value) {
 				min_index = k;
 				min_value = distance[k].m_distance;
 			}
@@ -177,7 +179,8 @@ void dijkstra(const int* matrix, int node_size,
 		flags[min_index] = true;
 
 		for (auto k = 0; k < node_size; ++k) {
-			if (k == min_index) {
+			// If the node has been finalized, then skip.
+			if (flags[k]) {
 				continue;
 			}
 
