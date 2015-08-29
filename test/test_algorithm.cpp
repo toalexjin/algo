@@ -19,7 +19,7 @@ test_algorithm_t st_test;
 } // unnamed namespace.
 
 
-const int test_algorithm_t::st_area[AREA_ROW_SIZE][AREA_COLUMN_SIZE] = {
+const int test_algorithm_t::st_islands[ISLANDS_ROW_SIZE][ISLANDS_COLUMN_SIZE] = {
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 0
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 1
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 2
@@ -33,6 +33,15 @@ const int test_algorithm_t::st_area[AREA_ROW_SIZE][AREA_COLUMN_SIZE] = {
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }  // 10
 };
 
+
+const int test_algorithm_t::st_dijkstra[DIJKSTRA_NODE_COUNT][DIJKSTRA_NODE_COUNT] = {
+	{ 0, 6, 2, 5, 9, X }, // 0
+	{ 6, 0, 2, X, 1, X }, // 1
+	{ 2, 2, 0, X, X, 4 }, // 2
+	{ 5, X, X, 0, X, 6 }, // 3
+	{ 9, 1, X, X, 0, X }, // 4
+	{ X, X, 4, 6, X, 0 }  // 5
+};
 
 bool test_algorithm_t::run() {
 	typedef bool (test_algorithm_t::*mem_func_t)();
@@ -81,12 +90,12 @@ bool test_algorithm_t::test_island_size() {
 		std::cout << "Island Position: " << (*it).first << "," << (*it).second << std::endl;
 
 		std::vector<std::pair<int, int>> result[2];
-		algo::search_single_island(algo::SEARCH_STRATEGY_BFS, (int*)st_area,
-			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second, &result[0]);
+		algo::search_single_island(algo::SEARCH_STRATEGY_BFS, (int*)st_islands,
+			ISLANDS_ROW_SIZE, ISLANDS_COLUMN_SIZE, (*it).first, (*it).second, &result[0]);
 
 		std::vector<std::pair<int, int>> v2;
-		algo::search_single_island(algo::SEARCH_STRATEGY_DFS, (int*)st_area,
-			AREA_ROW_SIZE, AREA_COLUMN_SIZE, (*it).first, (*it).second, &result[1]);
+		algo::search_single_island(algo::SEARCH_STRATEGY_DFS, (int*)st_islands,
+			ISLANDS_ROW_SIZE, ISLANDS_COLUMN_SIZE, (*it).first, (*it).second, &result[1]);
 
 		// Less function.
 		auto less = [](const std::pair<int, int>& n1, const std::pair<int, int>& n2) -> bool {
