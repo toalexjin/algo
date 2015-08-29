@@ -19,7 +19,7 @@ test_algorithm_t st_test;
 } // unnamed namespace.
 
 
-const int test_algorithm_t::st_islands[ISLANDS_ROW_SIZE][ISLANDS_COLUMN_SIZE] = {
+const int test_algorithm_t::st_islands[const_islands_row_size][const_islands_column_size] = {
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 0
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 1
 	{ 1, 0, 0, 1, 1, 1, 0, 0, 0, 1 }, // 2
@@ -34,7 +34,7 @@ const int test_algorithm_t::st_islands[ISLANDS_ROW_SIZE][ISLANDS_COLUMN_SIZE] = 
 };
 
 
-const int test_algorithm_t::st_dijkstra[DIJKSTRA_NODE_COUNT][DIJKSTRA_NODE_COUNT] = {
+const int test_algorithm_t::st_dijkstra[const_dijkstra_node_size][const_dijkstra_node_size] = {
 	{ 0, 6, 2, 5, 9, X }, // 0
 	{ 6, 0, 2, X, 1, X }, // 1
 	{ 2, 2, 0, X, X, 4 }, // 2
@@ -46,11 +46,13 @@ const int test_algorithm_t::st_dijkstra[DIJKSTRA_NODE_COUNT][DIJKSTRA_NODE_COUNT
 bool test_algorithm_t::run() {
 	typedef bool (test_algorithm_t::*mem_func_t)();
 
-	mem_func_t functions[2] = {
+	mem_func_t functions[] = {
 		&test_algorithm_t::test_number_combinations,
-		&test_algorithm_t::test_island_size };
+		&test_algorithm_t::test_island_size,
+		&test_algorithm_t::test_dijkstra
+	};
 
-	for (auto i = 0; i < 2; ++i) {
+	for (size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); ++i) {
 		auto ptr = functions[i];
 
 		if (!(this->*ptr)()) {
@@ -63,20 +65,25 @@ bool test_algorithm_t::run() {
 
 bool test_algorithm_t::test_number_combinations() {
 
+	std::cout << "test_algorithm_t::" << __func__ << "():" << std::endl;
+
 	for (auto i = 0; i <= 3; ++i) {
 		std::cout << "Number: " << i << std::endl;
 
-		algo::number_combinations(i, [](const int* numbers, int n) {
+		algo::number_combinations(i, [](const std::vector<int>& numbers) {
 			std::cout << "=> ";
-			std::copy(numbers, numbers + n, std::ostream_iterator<int>(std::cout, ","));
+			std::copy(numbers.begin(), numbers.end(), std::ostream_iterator<int>(std::cout, ","));
 			std::cout << std::endl;
 		});
 	}
+	std::cout << std::endl;
 
 	return true;
 }
 
 bool test_algorithm_t::test_island_size() {
+
+	std::cout << "test_algorithm_t::" << __func__ << "():" << std::endl;
 
 	std::vector<std::pair<int, int>> numbers;
 
@@ -90,12 +97,12 @@ bool test_algorithm_t::test_island_size() {
 		std::cout << "Island Position: " << (*it).first << "," << (*it).second << std::endl;
 
 		std::vector<std::pair<int, int>> result[2];
-		algo::search_single_island(algo::SEARCH_STRATEGY_BFS, (int*)st_islands,
-			ISLANDS_ROW_SIZE, ISLANDS_COLUMN_SIZE, (*it).first, (*it).second, &result[0]);
+		algo::search_single_island(algo::SEARCH_STRATEGY_BFS, (const int*)st_islands,
+			const_islands_row_size, const_islands_column_size, (*it).first, (*it).second, &result[0]);
 
 		std::vector<std::pair<int, int>> v2;
-		algo::search_single_island(algo::SEARCH_STRATEGY_DFS, (int*)st_islands,
-			ISLANDS_ROW_SIZE, ISLANDS_COLUMN_SIZE, (*it).first, (*it).second, &result[1]);
+		algo::search_single_island(algo::SEARCH_STRATEGY_DFS, (const int*)st_islands,
+			const_islands_row_size, const_islands_column_size, (*it).first, (*it).second, &result[1]);
 
 		// Less function.
 		auto less = [](const std::pair<int, int>& n1, const std::pair<int, int>& n2) -> bool {
@@ -127,6 +134,40 @@ bool test_algorithm_t::test_island_size() {
 			return false;
 		}
 	}
+	std::cout << std::endl;
+
+	return true;
+}
+
+bool test_algorithm_t::test_dijkstra() {
+
+	std::cout << "test_algorithm_t::" << __func__ << "():" << std::endl;
+	
+	std::map<int, algo::distance_t> paths;
+
+	for (int from = 0; from < (int)const_dijkstra_node_size; ++from) {
+		algo::dijkstra((const int*)st_dijkstra, const_dijkstra_node_size, from, &paths);
+
+		for (auto it = paths.begin(); it != paths.end(); ++ it) {
+			std::cout << "[" << from << " => " << (*it).first << "] = ";
+
+			if ((*it).second.m_distance == algo::distance_t::const_unreachable) {
+				std::cout << "X";
+			}
+			else {
+				std::cout << (*it).second.m_distance << " ";
+
+				const auto path((*it).second.m_paths);
+				std::cout << "[ " << from << " -> ";
+				std::copy(path.begin(), path.end(), std::ostream_iterator<int>(std::cout, " -> "));
+				std::cout << (*it).first << " ]";
+			}
+
+			std::cout << std::endl;
+		}
+	}
+
+	std::cout << std::endl;
 
 	return true;
 }

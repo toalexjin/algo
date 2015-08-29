@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include <limits.h>
 #include <vector>
 #include <utility>
+#include <map>
 
 
 namespace algo {
@@ -16,11 +18,11 @@ namespace number__ {
 
 	template <class Functor>
 	inline void number_combinations_i(int n, const Functor& functor,
-		int* numbers, bool* flags, int index) {
+		std::vector<int>& numbers, std::vector<bool>& flags, int index) {
 
 		// End.
 		if (index == n) {
-			functor(numbers, n);
+			functor(numbers);
 			return;
 		}
 
@@ -45,17 +47,10 @@ namespace number__ {
  */
 template <class Functor>
 inline void number_combinations(int n, const Functor& functor) {
-	int* numbers = new int[n];
-	bool* flags = new bool[n];
-
-	for (auto i = 0; i < n; ++i) {
-		flags[i] = false;
-	}
+	std::vector<int> numbers(n);
+	std::vector<bool> flags(n, false);
 
 	number__::number_combinations_i(n, functor, numbers, flags, 0);
-
-	delete[] numbers;
-	delete[] flags;
 }
 
 enum search_strategy_t {
@@ -76,6 +71,27 @@ void search_single_island(
 	int row_size, int column_size,
 	int row_position, int column_position,
 	std::vector<std::pair<int, int>>* island_area);
+
+
+struct distance_t {
+	distance_t() : m_distance(0) {
+	}
+
+	explicit distance_t(int distance) : m_distance(distance) {
+	}
+
+	enum { const_unreachable = INT_MAX };
+
+	// INT_MAX means unreachable.
+	int m_distance;
+	std::vector<int> m_paths;
+};
+
+
+/**
+ * Dijkstra shortest path algorithm.
+ */
+void dijkstra(const int* matrix, int node_size, int from, std::map<int, distance_t>* paths);
 
 } // namespace algo
 

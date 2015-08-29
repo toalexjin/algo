@@ -33,10 +33,7 @@ void search_single_island_bfs(
 	}
 
 	// Indicates if a node has been visited or not.
-	bool* flags = new bool[row_size * column_size];
-	for (auto i = 0; i < row_size * column_size; ++i) {
-		flags[i] = false;
-	}
+	std::vector<bool> flags(row_size * column_size, false);
 
 	// Add first node.
 	island_area->push_back(std::pair<int, int>(row_position, column_position));
@@ -71,16 +68,13 @@ void search_single_island_bfs(
 
 		++head;
 	}
-
-	delete[] flags;
-	flags = 0;
 }
 
 void search_single_island_dfs_i(
 	const int* area,
 	int row_size, int column_size,
 	int row_position, int column_position,
-	bool* flags, std::vector<std::pair<int, int>>* island_area) {
+	std::vector<bool>& flags, std::vector<std::pair<int, int>>* island_area) {
 
 	// Set visited flag.
 	flags[row_position * column_size + column_position] = true;
@@ -117,18 +111,14 @@ void search_single_island_dfs(
 	}
 
 	// Indicates if a node has been visited or not.
-	bool* flags = new bool[row_size * column_size];
-	for (auto i = 0; i < row_size * column_size; ++i) {
-		flags[i] = false;
-	}
+	std::vector<bool> flags(row_size * column_size, false);
 
-	search_single_island_dfs_i(area, row_size, column_size, row_position, column_position, flags, island_area);
-
-	delete[] flags;
-	flags = 0;
+	search_single_island_dfs_i(area, row_size, column_size,
+		row_position, column_position, flags, island_area);
 }
 
 } // unnamed namespace.
+
 
 
 namespace algo {
@@ -147,6 +137,63 @@ void search_single_island(
 	}
 }
 
+void dijkstra(const int* matrix, int node_size,
+	int from, std::map<int, distance_t>* paths) {
+
+	// Clear data.
+	paths->clear();
+
+	std::vector<distance_t> distance;
+	distance.reserve(node_size);
+
+	for (auto i = 0; i < node_size; ++ i) {
+		distance.push_back(distance_t(matrix[from * node_size + i]));
+	}
+
+	// Indicates if a node has been processed or not.
+	std::vector<bool> flags(node_size, false);
+
+	// Mark the source node as processed.
+	flags[from] = true;
+
+	// Besides the source node, there are "node_size - 1" nodes,
+	// so we need to loop "node_size - 1" times.
+	for (auto i = 0; i < node_size - 1; ++i) {
+		int min_index = -1;
+		int min_value = distance_t::const_unreachable;
+
+		// Find which node is the closest to the source node.
+		for (auto k = 0; k < node_size; ++k) {
+			if (!flags[k] && distance[k].m_distance < min_value) {
+				min_index = k;
+				min_value = distance[k].m_distance;
+			}
+		}
+
+		if (min_value == distance_t::const_unreachable) {
+			break;
+		}
+
+		flags[min_index] = true;
+
+		for (auto k = 0; k < node_size; ++k) {
+			if (k == min_index) {
+				continue;
+			}
+
+			if (matrix[min_index * node_size + k] != distance_t::const_unreachable) {
+				if (distance[k].m_distance > min_value + matrix[min_index * node_size + k]) {
+					distance[k].m_distance = min_value + matrix[min_index * node_size + k];
+					distance[k].m_paths = distance[min_index].m_paths;
+					distance[k].m_paths.push_back(min_index);
+				}
+			}
+		}
+	}
+
+	for (int index = 0; index < (int)distance.size(); ++index) {
+		(*paths)[index] = distance[index];
+	}
+}
+
 } // namespace algo.
-
-

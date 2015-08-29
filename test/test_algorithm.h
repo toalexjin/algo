@@ -7,7 +7,7 @@
 #pragma once
 
 #include "test/test.h"
-#include <limits.h>
+#include "algo/algorithm.h"
 
 
 // Test case for algorithms.
@@ -17,16 +17,17 @@ public:
 	virtual bool run();
 
 public:
-	enum { ISLANDS_ROW_SIZE = 11, ISLANDS_COLUMN_SIZE = 10 };
-	enum { DIJKSTRA_NODE_COUNT = 6 };
-	enum { X = INT_MAX };
+	enum { const_islands_row_size = 11, const_islands_column_size = 10 };
+	enum { const_dijkstra_node_size = 6 };
+	enum { X = algo::distance_t::const_unreachable };
 
 private:
 	bool test_number_combinations();
 	bool test_island_size();
+	bool test_dijkstra();
 
 private:
-	static const int st_islands[ISLANDS_ROW_SIZE][ISLANDS_COLUMN_SIZE];
-	static const int st_dijkstra[DIJKSTRA_NODE_COUNT][DIJKSTRA_NODE_COUNT];
+	static const int st_islands[const_islands_row_size][const_islands_column_size];
+	static const int st_dijkstra[const_dijkstra_node_size][const_dijkstra_node_size];
 };
 
