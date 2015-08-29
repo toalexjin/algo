@@ -67,11 +67,11 @@ namespace rbtree__ {
 		typedef T value_type;
 
 	public:
-		ctner_t() : m_root(0), m_size(0) {
+		ctner_t() : m_root(0), m_smallest(0), m_biggest(0), m_size(0) {
 		}
 
 		explicit ctner_t(const Compare& less)
-			: m_root(0), m_size(0), m_less(less) {
+			: m_root(0), m_smallest(0), m_biggest(0), m_size(0), m_less(less) {
 		}
 
 		~ctner_t() {
@@ -79,62 +79,78 @@ namespace rbtree__ {
 		}
 
 		size_t size() const {
+			assert(this->is_valid());
+
 			return this->m_size;
 		}
 
 		Compare key_compare() const {
+			assert(this->is_valid());
+
 			return this->m_less;
 		}
 
 		void clear() {
+			assert(this->is_valid());
+
 			if (m_root == 0) {
 				return;
 			}
 
 			this->clear_i(m_root);
 			m_root = 0;
+			m_smallest = 0;
+			m_biggest = 0;
 			this->m_size = 0;
 		}
 
 		node_t<T>* get_smallest() const {
-			if (m_root == 0) {
+			return this->m_smallest;
+		}
+
+		node_t<T>* get_biggest() const {
+			return this->m_biggest;
+		}
+
+		static node_t<T>* get_smallest_i(const node_t<T>* node_ptr) {
+			if (node_ptr == 0) {
 				return 0;
 			}
 
-			node_t<T>* ptr = (node_t<T>*) m_root;
+			auto ptr = node_ptr;
 			while (ptr->m_left != 0) {
 				ptr = ptr->m_left;
 			}
 
-			return ptr;
+			return (node_t<T>*)ptr;
 		}
 
-		node_t<T>* get_biggest() const {
-			if (m_root == 0) {
+		static node_t<T>* get_biggest_i(const node_t<T>* node_ptr) {
+			if (node_ptr == 0) {
 				return 0;
 			}
 
-			node_t<T>* ptr = (node_t<T>*) m_root;
+			auto ptr = node_ptr;
 			while (ptr->m_right != 0) {
 				ptr = ptr->m_right;
 			}
 
-			return ptr;
+			return (node_t<T>*)ptr;
 		}
 
-		node_t<T>* next(const node_t<T>* node_ptr) const {
+		static node_t<T>* next(const node_t<T>* node_ptr) {
 			assert(node_ptr != 0);
 
-			node_t<T>* result_ptr = 0;
+			const node_t<T>* result_ptr = 0;
 
 			if (node_ptr->m_right != 0) {
-				result_ptr = (node_t<T>*) node_ptr->m_right;
+				result_ptr = node_ptr->m_right;
 				while (result_ptr->m_left != 0) {
 					result_ptr = result_ptr->m_left;
 				}
 			}
 			else {
-				auto child = (node_t<T>*) node_ptr;
+				auto child = node_ptr;
 				auto parent = child->m_parent;
 
 				while (parent != 0 && parent->m_right == child) {
@@ -145,24 +161,20 @@ namespace rbtree__ {
 				result_ptr = parent;
 			}
 
-			return result_ptr;
+			return (node_t<T>*)result_ptr;
 		}
 
-		node_t<T>* prev(const node_t<T>* node_ptr) const {
-			if (node_ptr == 0) {
-				return this->get_biggest();
-			}
-
-			node_t<T>* result_ptr = 0;
+		static node_t<T>* prev(const node_t<T>* node_ptr) {
+			const node_t<T>* result_ptr = 0;
 
 			if (node_ptr->m_left != 0) {
-				result_ptr = (node_t<T>*) node_ptr->m_left;
+				result_ptr = node_ptr->m_left;
 				while (result_ptr->m_right != 0) {
 					result_ptr = result_ptr->m_right;
 				}
 			}
 			else {
-				auto child = (node_t<T>*) node_ptr;
+				auto child = node_ptr;
 				auto parent = child->m_parent;
 
 				while (parent != 0 && parent->m_left == child) {
@@ -173,10 +185,12 @@ namespace rbtree__ {
 				result_ptr = parent;
 			}
 
-			return result_ptr;
+			return (node_t<T>*) result_ptr;
 		}
 
 		std::pair<node_t<T>*, bool> insert(const T& value) {
+			assert(this->is_valid());
+
 			const auto found(this->find(value));
 
 			// The key already exists.
@@ -188,26 +202,40 @@ namespace rbtree__ {
 			auto new_ptr = new node_t<T>(value);
 			if (found.m_result == find_result_no_root) {
 				this->m_root = new_ptr;
+				this->m_smallest = new_ptr;
+				this->m_biggest = new_ptr;
 			}
 			else if (found.m_result == find_result_left) {
 				found.m_node_ptr->m_left = new_ptr;
 				new_ptr->m_parent = found.m_node_ptr;
+
+				// If the new node is left child of the current smallest node,
+				// then the new node becomes the new smallest node.
+				if (this->m_smallest == found.m_node_ptr) {
+					this->m_smallest = new_ptr;
+				}
 			}
 			else {
 				found.m_node_ptr->m_right = new_ptr;
 				new_ptr->m_parent = found.m_node_ptr;
+
+				// If the new node is right child of the current biggest node,
+				// then the new node becomes the new biggest node.
+				if (this->m_biggest == found.m_node_ptr) {
+					this->m_biggest = new_ptr;
+				}
 			}
 
 			this->m_size++;
 
 			// TO-DO: Rotate.
-			if (this->m_size > 2) {
-			}
 
 			return std::pair<node_t<T>*, bool>(new_ptr, true);
 		}
 
 		find_t<T> find(const T& value) const {
+			assert(this->is_valid());
+
 			find_t<T> result;
 
 			auto ptr = (node_t<T>*) m_root;
@@ -231,11 +259,67 @@ namespace rbtree__ {
 			return result;
 		}
 
+		void replace_subtree(node_t<T>* node_old, node_t<T>* node_new) {
+			if (this->m_root == node_old) {
+				this->m_root = node_new;
+			}
+			else if (node_old == node_old->m_parent->m_left) {
+				node_old->m_parent->m_left = node_new;
+			}
+			else {
+				node_old->m_parent->m_right = node_new;
+			}
+
+			if (node_new != 0) {
+				node_new->m_parent = node_old->m_parent;
+			}
+		}
+
 		void erase(node_t<T>* node_ptr) {
-			// TO-DO.
+			assert(this->is_valid());
+
+			auto parent_ptr = node_ptr->m_parent;
+
+			if (node_ptr->m_left == 0) {
+				this->replace_subtree(node_ptr, node_ptr->m_right);
+			}
+			else if (node_ptr->m_right == 0) {
+				this->replace_subtree(node_ptr, node_ptr->m_left);
+			}
+			else {
+				node_t<T>* next_ptr = this->get_smallest_i(node_ptr->m_right);
+
+				if (next_ptr->m_parent != node_ptr) {
+					this->replace_subtree(next_ptr, next_ptr->m_right);
+					next_ptr->m_right = node_ptr->m_right;
+					next_ptr->m_right->m_parent = next_ptr;
+				}
+
+				this->replace_subtree(node_ptr, next_ptr);
+				next_ptr->m_left = node_ptr->m_left;
+				next_ptr->m_left->m_parent = next_ptr;
+			}
+
+			// Update smallest & biggest nodes.
+			if (this->m_smallest == node_ptr) {
+				this->m_smallest = this->get_smallest_i(
+					parent_ptr == 0 ? this->m_root : parent_ptr);
+			}
+			
+			if (this->m_biggest == node_ptr) {
+				this->m_biggest = this->get_biggest_i(
+					parent_ptr == 0 ? this->m_root : parent_ptr);
+			}
+
+			this->m_size--;
+
+			// TO-DO: Rotate.
 		}
 
 		void assign(self_type& another) {
+			assert(this->is_valid());
+			assert(another.is_valid());
+
 			if (this != &another) {
 				// Delete old data.
 				this->clear();
@@ -248,6 +332,10 @@ namespace rbtree__ {
 					this->copy_i(&m_root, another.m_root);
 				}
 				this->m_size = another.m_size;
+
+				// Get smallest and biggest nodes again.
+				this->m_smallest = this->get_smallest_i(this->m_root);
+				this->m_biggest = this->get_biggest_i(this->m_root);
 			}
 		}
 
@@ -282,8 +370,21 @@ namespace rbtree__ {
 			}
 		}
 
+	#ifndef NDEBUG
+		bool is_valid() const {
+			if (this->m_smallest != this->get_smallest_i(m_root)
+				|| this->m_biggest != this->get_biggest_i(m_root)) {
+				return false;
+			}
+
+			return true;
+		}
+	#endif
+
 	private:
 		node_t<T>* m_root;
+		node_t<T>* m_smallest;
+		node_t<T>* m_biggest;
 		size_t m_size;
 		Compare m_less;
 	};
@@ -340,7 +441,14 @@ namespace rbtree__ {
 
 		self_type& operator--() {
 			assert(m_ctner != 0);
-			m_current = this->m_ctner->prev(m_current);
+			
+			if (this->m_current == 0) {
+				this->m_current = this->m_ctner->get_biggest();
+			}
+			else {
+				this->m_current = this->m_ctner->prev(this->m_current);
+			}
+
 			return *this;
 		}
 

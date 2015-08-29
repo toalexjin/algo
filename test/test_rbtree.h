@@ -61,7 +61,17 @@ private:
 		this->dump(is_less ? descending : ascending, v1.rbegin(), v1.rend());
 		this->dump(is_less ? ascending : descending, v2.begin(), v2.end());
 		this->dump(is_less ? descending : ascending, v2.rbegin(), v2.rend());
-		
+
+		auto v3(tree);
+		int times = 0;
+		for (auto it = ctner.begin(); it != ctner.end() && times < 5; ++it, ++times) {
+			std::cout << "<Erase>: " << *it << std::endl;
+			v3.erase(*it);
+		}
+		std::cout << "Size after erase: " << v3.size() << std::endl;
+		this->dump(is_less ? ascending : descending, v3.begin(), v3.end());
+		this->dump(is_less ? descending : ascending, v3.rbegin(), v3.rend());
+
 		return true;
 	}
 
