@@ -49,7 +49,8 @@ bool test_algorithm_t::run() {
 	mem_func_t functions[] = {
 		&test_algorithm_t::test_number_combinations,
 		&test_algorithm_t::test_island_size,
-		&test_algorithm_t::test_dijkstra
+		&test_algorithm_t::test_dijkstra,
+		&test_algorithm_t::test_prime_numbers
 	};
 
 	for (size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); ++i) {
@@ -167,6 +168,23 @@ bool test_algorithm_t::test_dijkstra() {
 		}
 	}
 
+	std::cout << std::endl;
+
+	return true;
+}
+
+bool test_algorithm_t::test_prime_numbers() {
+
+	std::cout << "test_algorithm_t::" << __func__ << "():" << std::endl;
+
+	const auto max_number = 1000;
+	std::vector<int> prime_numbers;
+
+	algo::calc_prime_numbers(max_number, &prime_numbers);
+	std::cout << "Max number: " << max_number << std::endl;
+	std::cout << "Prime numbers: ";
+	std::copy(prime_numbers.begin(), prime_numbers.end(),
+		std::ostream_iterator<int>(std::cout, ","));
 	std::cout << std::endl;
 
 	return true;

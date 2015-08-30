@@ -88,11 +88,27 @@ inline void quick_sort(Iterator first, Iterator last, const Less& less = Less())
 enum sort_algo_t {
 	SORT_ALGO_MIN = 1,
 	SORT_ALGO_MAX = 3,
+
+	// Bubble sort.
 	SORT_ALGO_BUBBLE = 1,
+
+	// Selection sort.
 	SORT_ALGO_SELECTION = 2,
+
+	// Quick sort.
 	SORT_ALGO_QUICK = 3
 };
 
+/**
+ * Sorting algorithm.
+ *
+ * The range is [first, last).
+ *
+ * @param algo [in] A value of sort_algo_t.
+ * @param first [in] First iterator.
+ * @param last [in] Last iterator.
+ * @param less [in] Element comparison functor.
+ */
 template <class Iterator, class Less = std::less<typename std::iterator_traits<Iterator>::value_type>>
 inline void sort(sort_algo_t algo, Iterator first, Iterator last, const Less& less = Less()) {
 	switch (algo) {

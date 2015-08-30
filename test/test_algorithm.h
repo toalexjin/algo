@@ -25,6 +25,7 @@ private:
 	bool test_number_combinations();
 	bool test_island_size();
 	bool test_dijkstra();
+	bool test_prime_numbers();
 
 private:
 	static const int st_islands[const_islands_row_size][const_islands_column_size];

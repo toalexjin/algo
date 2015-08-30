@@ -5,6 +5,7 @@
  */
 
 #include "algo/algorithm.h"
+#include <assert.h>
 
 
 namespace {
@@ -17,18 +18,15 @@ const int st_move[4][2] = {
 };
 
 void search_single_island_bfs(
-	const int* area,
+	const int* matrix,
 	int row_size, int column_size,
 	int row_position, int column_position,
 	std::vector<std::pair<int, int>>* island_area) {
 
-	// Clear array.
-	island_area->clear();
-
 	auto index = row_position * column_size + column_position;
 
 	// If the current node is not land, then return immediately.
-	if (area[index] == 0) {
+	if (matrix[index] == 0) {
 		return;
 	}
 
@@ -55,7 +53,7 @@ void search_single_island_bfs(
 				|| row_next >= row_size
 				|| column_next < 0
 				|| column_next >= column_size
-				|| area[index_next] == 0
+				|| matrix[index_next] == 0
 				|| flags[index_next]) {
 				continue;
 			}
@@ -71,7 +69,7 @@ void search_single_island_bfs(
 }
 
 void search_single_island_dfs_i(
-	const int* area,
+	const int* matrix,
 	int row_size, int column_size,
 	int row_position, int column_position,
 	std::vector<bool>& flags, std::vector<std::pair<int, int>>* island_area) {
@@ -88,32 +86,29 @@ void search_single_island_dfs_i(
 			|| row_next >= row_size
 			|| column_next < 0
 			|| column_next >= column_size
-			|| area[row_next * column_size + column_next] == 0
+			|| matrix[row_next * column_size + column_next] == 0
 			|| flags[row_next * column_size + column_next]) {
 			continue;
 		}
 
-		search_single_island_dfs_i(area, row_size, column_size, row_next, column_next, flags, island_area);
+		search_single_island_dfs_i(matrix, row_size, column_size, row_next, column_next, flags, island_area);
 	}
 }
 
 void search_single_island_dfs(
-	const int* area,
+	const int* matrix,
 	int row_size, int column_size,
 	int row_position, int column_position,
 	std::vector<std::pair<int, int>>* island_area) {
 
-	// Clear array.
-	island_area->clear();
-
-	if (area[row_position * column_size + column_position] == 0) {
+	if (matrix[row_position * column_size + column_position] == 0) {
 		return;
 	}
 
 	// Indicates if a node has been visited or not.
 	std::vector<bool> flags(row_size * column_size, false);
 
-	search_single_island_dfs_i(area, row_size, column_size,
+	search_single_island_dfs_i(matrix, row_size, column_size,
 		row_position, column_position, flags, island_area);
 }
 
@@ -124,24 +119,49 @@ void search_single_island_dfs(
 namespace algo {
 
 void search_single_island(
-	search_strategy_t strategy, const int* area,
+	search_strategy_t strategy, const int* matrix,
 	int row_size, int column_size,
 	int row_position, int column_position,
 	std::vector<std::pair<int, int>>* island_area) {
 
+	assert(matrix != 0 || row_size == 0 || column_size == 0);
+	assert(row_size >= 0);
+	assert(column_size >= 0);
+	assert(row_position >= 0);
+	assert(column_position >= 0);
+	assert(island_area != 0);
+
+	// Clear data.
+	island_area->clear();
+
+	// If the matrix is empty, then return immediately.
+	if (row_size <= 0 || column_size <= 0) {
+		return;
+	}
+
 	if (strategy == SEARCH_STRATEGY_BFS) {
-		search_single_island_bfs(area, row_size, column_size, row_position, column_position, island_area);
+		search_single_island_bfs(matrix, row_size, column_size, row_position, column_position, island_area);
 	}
 	else {
-		search_single_island_dfs(area, row_size, column_size, row_position, column_position, island_area);
+		search_single_island_dfs(matrix, row_size, column_size, row_position, column_position, island_area);
 	}
 }
 
 void dijkstra(const int* matrix, int node_size,
 	int from, std::map<int, distance_t>* paths) {
 
+	assert(matrix != 0 || node_size == 0);
+	assert(node_size >= 0);
+	assert(from >= 0);
+	assert(paths != 0);
+
 	// Clear data.
 	paths->clear();
+
+	// If the matrix is empty, then return immediately.
+	if (node_size <= 0) {
+		return;
+	}
 
 	std::vector<distance_t> distance;
 	distance.reserve(node_size);
@@ -198,5 +218,39 @@ void dijkstra(const int* matrix, int node_size,
 		(*paths)[index] = distance[index];
 	}
 }
+
+
+void calc_prime_numbers(int max_number, std::vector<int>* prime_numbers) {
+
+	assert(max_number >= 0);
+	assert(prime_numbers != 0);
+
+	// Clear data.
+	prime_numbers->clear();
+
+	// If max number is too small, then return immediately.
+	if (max_number <= 1) {
+		return;
+	}
+
+	std::vector<bool> flags(max_number + 1, true);
+
+	for (int i = 2; i * i <= max_number; ++i) {
+		if (!flags[i]) {
+			continue;
+		}
+
+		for (int k = 2 * i; k <= max_number; k += i) {
+			flags[k] = false;
+		}
+	}
+
+	for (int i = 2; i <= max_number; ++i) {
+		if (flags[i]) {
+			prime_numbers->push_back(i);
+		}
+	}
+}
+
 
 } // namespace algo.

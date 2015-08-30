@@ -19,6 +19,11 @@ namespace algo {
  * 
  * Functor prototype: void functor(char from, char to);
  *
+ * @param n [in] Number of disks.
+ * @param a [in] E.g.'A'
+ * @param b [in] E.g.'B'
+ * @param c [in] E.g.'C'
+ * @param functor [in] Functor.
  * @return Number of steps.
  */
 template <class Functor>
