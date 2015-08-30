@@ -89,7 +89,7 @@ struct distance_t {
 	explicit distance_t(int distance) : m_distance(distance) {
 	}
 
-	enum { const_unreachable = INT_MAX };
+	static const int const_unreachable = INT_MAX;
 
 	// INT_MAX means unreachable.
 	int m_distance;

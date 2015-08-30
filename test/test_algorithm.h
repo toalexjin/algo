@@ -17,9 +17,10 @@ public:
 	virtual bool run();
 
 public:
-	enum { const_islands_row_size = 11, const_islands_column_size = 10 };
-	enum { const_dijkstra_node_size = 6 };
-	enum { X = algo::distance_t::const_unreachable };
+	static const int const_islands_row_size = 11;
+	static const int const_islands_column_size = 10;
+	static const int const_dijkstra_node_size = 6;
+	static const int X = algo::distance_t::const_unreachable;
 
 private:
 	bool test_number_combinations();
