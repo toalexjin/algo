@@ -9,6 +9,8 @@
 #include <assert.h>
 #include <functional>
 #include <iterator>
+#include <algorithm>
+
 
 
 namespace algo {
@@ -18,9 +20,9 @@ inline void bubble_sort(Iterator first, Iterator last, const Less& less = Less()
 	for (typename std::iterator_traits<Iterator>::difference_type i = 0; i < last - first - 1; ++i) {
 		for (auto k = first; k < last - 1 - i; ++k) {
 			if (less(*(k + 1), *k)) {
-				const auto tmp(*k);
-				*k = *(k + 1);
-				*(k + 1) = tmp;
+				// The element might override std::swap() to use itself swap implementation,
+				// so we call std::swap() to get a better performance.
+				std::swap(*(k + 1), *k);
 			}
 		}
 	}
@@ -38,9 +40,9 @@ inline void selection_sort(Iterator first, Iterator last, const Less& less = Les
 		}
 
 		if (min != first + i) {
-			const auto tmp(*min);
-			*min = *(first + i);
-			*(first + i) = tmp;
+			// The element might override std::swap() to use itself swap implementation,
+			// so we call std::swap() to get a better performance.
+			std::swap(*min, *(first + i));
 		}
 	}
 }
@@ -72,9 +74,9 @@ inline void quick_sort(Iterator first, Iterator last, const Less& less = Less())
 			break;
 		}
 
-		const auto tmp(*front);
-		*front = *back;
-		*back = tmp;
+		// The element might override std::swap() to use itself swap implementation,
+		// so we call std::swap() to get a better performance.
+		std::swap(*front, *back);
 	}
 
 	*first = *front;
