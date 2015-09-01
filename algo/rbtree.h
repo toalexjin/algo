@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <functional>
 #include <iterator>
+#include <initializer_list>
 
 
 namespace algo {
@@ -529,8 +530,7 @@ public:
 	typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
 
 public:
-	rbtree_t() {
-		m_ctner = new ctner_type();
+	rbtree_t() : rbtree_t(Compare()){
 	}
 
 	explicit rbtree_t(const Compare& less) {
@@ -540,6 +540,11 @@ public:
 	rbtree_t(const self_type& another) {
 		m_ctner = new ctner_type();
 		*this = another;
+	}
+
+	rbtree_t(std::initializer_list<T> list, const Compare& less = Compare())
+		: rbtree_t(less) {
+		this->insert(list);
 	}
 
 	virtual ~rbtree_t() {
@@ -581,6 +586,7 @@ public:
 		}
 	}
 	std::pair<iterator, bool> insert(const T& value);
+	void insert(std::initializer_list<T> list);
 
 	void erase(iterator it);
 	void erase(iterator first, iterator last);
@@ -597,6 +603,7 @@ public:
 	reverse_const_iterator rend() const;
 
 	self_type& operator=(const self_type& another);
+	self_type& operator=(std::initializer_list<T> list);
 	self_type& swap(self_type& another);
 
 private:
@@ -634,6 +641,13 @@ inline std::pair<typename rbtree_t<T, Compare>::iterator, bool> rbtree_t<T, Comp
 
 	return std::pair<typename rbtree_t<T, Compare>::iterator, bool>(
 		iterator(this->m_ctner, result.first), result.second);
+}
+
+template <class T, class Compare>
+inline void rbtree_t<T, Compare>::insert(std::initializer_list<T> list) {
+	for (auto it = list.begin(); it != list.end(); ++it) {
+		this->insert(*it);
+	}
 }
 
 template <class T, class Compare>
@@ -714,6 +728,13 @@ template <class T, class Compare>
 inline typename rbtree_t<T, Compare>::self_type& rbtree_t<T, Compare>::operator=(
 	const typename rbtree_t<T, Compare>::self_type& another) {
 	this->m_ctner->assign(*(another.m_ctner));
+	return *this;
+}
+
+template <class T, class Compare>
+inline typename rbtree_t<T, Compare>::self_type& rbtree_t<T, Compare>::operator=(std::initializer_list<T> list) {
+	this->clear();
+	this->insert(list);
 	return *this;
 }
 

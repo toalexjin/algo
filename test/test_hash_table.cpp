@@ -46,6 +46,10 @@ bool test_hash_table_t::run() {
 	v2 = table;
 	this->dump_4(&v2);
 
+	my_table_t v3({ { "11", "11 value" }, { "22", "22 value" }, { "33", "33 value" } });
+	v3.insert({ { "44", "44 value" },{ "55", "55 value" },{ "66", "66 value" } });
+	this->dump_4(&v3);
+
 	return true;
 }
 

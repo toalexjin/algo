@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <utility>
+#include <initializer_list>
 
 
 namespace algo {
@@ -246,9 +247,7 @@ public:
 	typedef std::reverse_iterator<const_iterator> reverse_const_iterator;
 
 public:
-	hash_table_t() {
-		this->m_ctner = new ctner_type();
-		this->m_ctner->reset(256);
+	hash_table_t() : hash_table_t(KeyTraits(), 256) {
 	}
 
 	hash_table_t(const self_type& another) {
@@ -256,10 +255,8 @@ public:
 		*this = another;
 	}
 
-	explicit hash_table_t(size_t array_size) {
-		assert(array_size > 0);
-		this->m_ctner = new ctner_type();
-		this->m_ctner->reset(array_size);
+	explicit hash_table_t(size_t array_size)
+		: hash_table_t(KeyTraits(), array_size) {
 	}
 
 	explicit hash_table_t(const KeyTraits& key_traits, size_t array_size = 256) {
@@ -267,6 +264,12 @@ public:
 		this->m_ctner = new ctner_type();
 		this->m_ctner->reset(array_size);
 		this->m_ctner->m_key_traits = key_traits;
+	}
+
+	hash_table_t(std::initializer_list<value_type> list,
+		const KeyTraits& key_traits = KeyTraits(),
+		size_t array_size = 256) : hash_table_t(key_traits, array_size) {
+		this->insert(list);
 	}
 
 	virtual ~hash_table_t() {
@@ -292,6 +295,7 @@ public:
 	const_iterator find(const Key& key) const;
 
 	std::pair<iterator, bool> insert(const Key& key, const T& value);
+	void insert(std::initializer_list<value_type> list);
 	size_t erase(const Key& key);
 	mapped_type& operator[](const key_type& key);
 
@@ -306,6 +310,7 @@ public:
 	reverse_const_iterator rend() const;
 
 	self_type& operator=(const self_type& another);
+	self_type& operator=(std::initializer_list<value_type> list);
 	self_type& swap(self_type& another);
 
 private:
@@ -359,6 +364,14 @@ inline std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool> hash_
 
 	m_ctner->m_size++;
 	return std::pair<typename hash_table_t<Key, T, KeyTraits>::iterator, bool>(iterator(m_ctner, new_ptr, (int)index), true);
+}
+
+template <class Key, class T, class KeyTraits>
+inline void hash_table_t<Key, T, KeyTraits>::insert(
+	std::initializer_list<typename hash_table_t<Key, T, KeyTraits>::value_type> list) {
+	for (auto it = list.begin(); it != list.end(); ++it) {
+		this->insert((*it).first, (*it).second);
+	}
 }
 
 template <class Key, class T, class KeyTraits>
@@ -454,6 +467,14 @@ inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T,
 		}
 	}
 
+	return *this;
+}
+
+template <class Key, class T, class KeyTraits>
+inline typename hash_table_t<Key, T, KeyTraits>::self_type& hash_table_t<Key, T, KeyTraits>::operator=(
+	std::initializer_list<typename hash_table_t<Key, T, KeyTraits>::value_type> list) {
+	this->clear();
+	this->insert(list);
 	return *this;
 }
 

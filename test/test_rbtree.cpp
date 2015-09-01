@@ -35,5 +35,12 @@ bool test_rbtree_t::run() {
 		}
 	}
 
+	algo::rbtree_t<int, std::greater<int>> r1({ 50, 40, 30, 60, 70, 80, 100, 100 });
+	r1.insert({ 200, 190, 180, 300, 240 });
+
+	if (!this->run_single(r1)) {
+		return false;
+	}
+
 	return true;
 }
