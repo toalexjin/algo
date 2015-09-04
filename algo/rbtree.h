@@ -344,8 +344,8 @@ namespace rbtree__ {
 
 	private:
 		// Disable copy contructor & operator=().
-		ctner_t(const self_type&);
-		self_type& operator=(const self_type&);
+		ctner_t(const self_type&) = delete;
+		self_type& operator=(const self_type&) = delete;
 
 		void clear_i(node_t<T>* node_ptr) {
 			if (node_ptr->m_left != 0) {
