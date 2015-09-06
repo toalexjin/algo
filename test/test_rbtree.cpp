@@ -42,5 +42,20 @@ bool test_rbtree_t::run() {
 		return false;
 	}
 
+	std::vector<std::vector<std::string>> strings;
+
+	strings.push_back(std::vector<std::string>());
+	strings.push_back(std::vector<std::string>({ "a" }));
+	strings.push_back(std::vector<std::string>({ "a", "b" }));
+	strings.push_back(std::vector<std::string>({ "a", "b", "c" }));
+	strings.push_back(std::vector<std::string>({ "a", "b", "c", "d" }));
+	strings.push_back(std::vector<std::string>({ "a", "b", "c", "d", "e" }));
+
+	for (auto it = strings.begin(); it != strings.end(); ++it) {
+		if (!this->run_single(*it)) {
+			return false;
+		}
+	}
+
 	return true;
 }

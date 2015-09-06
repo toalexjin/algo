@@ -44,7 +44,11 @@ private:
 		const auto descending = "<--: ";
 
 		algo::rbtree_t<typename Ctner::value_type, Compare> tree(compare);
-		tree.insert(ctner.begin(), ctner.end());
+
+		for (auto it = ctner.begin(); it != ctner.end(); ++it) {
+			tree.insert(typename Ctner::value_type(*it));
+		}
+
 		std::cout << "RB-Tree Size: " << tree.size() << std::endl;
 		this->dump(is_less ? ascending : descending, tree.begin(), tree.end());
 		this->dump(is_less ? descending : ascending, tree.rbegin(), tree.rend());
